@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Monopoli Ngawiland</title>
+<title>Monopoly Nusantara — Ultimate Fix</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
@@ -19,7 +19,6 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* ================= LAYOUT ================= */
   .app-container { display: flex; flex-direction: column; min-height: 100dvh; padding: 8px; gap: 8px; }
   @media (min-width: 1024px) { .app-container { padding: 16px; gap: 16px; } }
 
@@ -33,7 +32,6 @@
   @media (min-width: 1024px) { .main-layout { grid-template-columns: 1.2fr 1fr; gap: 20px; } }
   @media (min-width: 1280px) { .main-layout { grid-template-columns: 1.4fr 1fr; } }
 
-  /* ================= BOARD ================= */
   .board-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 
   .monopoly-board {
@@ -73,7 +71,6 @@
     50%      { border-color: #8b5cf6; }
   }
 
-  /* ================= TILES ================= */
   .tile { transition: transform 0.25s ease, box-shadow 0.25s ease; position: relative; cursor: pointer; overflow: hidden; }
   .tile:hover { border-color: #60a5fa; z-index: 5; }
   @media (hover: hover) { .tile:hover { transform: scale(1.08); z-index: 30; box-shadow: 0 0 20px rgba(96, 165, 250, 0.5); } }
@@ -112,7 +109,6 @@
     50%      { opacity: 0.9; }
   }
 
-  /* ================= TOKENS ================= */
   .token-pawn {
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
@@ -131,7 +127,6 @@
   }
   .token-hopping { animation: tokenHop 0.28s ease-out; }
 
-  /* ================= DICE ================= */
   .dice-container { perspective: 800px; width: clamp(38px, 10vw, 56px); height: clamp(38px, 10vw, 56px); }
   .dice-3d { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
   .dice-rolling { animation: roll3d 1.1s cubic-bezier(0.4, 0, 0.6, 1); }
@@ -162,7 +157,6 @@
     50%      { transform: scale(1.25); }
   }
 
-  /* ================= PANELS ================= */
   .glass-panel {
     background: rgba(30, 41, 59, 0.65);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -259,7 +253,6 @@
   }
   @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
 
-  /* ================= PROPERTY CARD ================= */
   .property-card {
     position: relative; width: 100%; max-width: 340px;
     background: linear-gradient(180deg, #fefce8 0%, #fef9c3 100%);
@@ -350,7 +343,6 @@
   .property-card-actions .btn-land { background: #7c3aed; color: white; }
   .property-card-actions .btn-unmort { background: #0891b2; color: white; }
 
-  /* ================= ULTIMATE OVERLAY ================= */
   .ultimate-overlay {
     position: fixed; inset: 0; z-index: 9999;
     display: flex; align-items: center; justify-content: center;
@@ -392,7 +384,6 @@
     50%      { box-shadow: 0 0 14px rgba(251,191,36,1); }
   }
 
-  /* ================= CARD HAND ================= */
   .card-hand { display: flex; flex-wrap: wrap; gap: 6px; min-height: 50px; }
   .mini-card {
     position: relative; width: clamp(38px, 10vw, 48px); height: clamp(52px, 14vw, 64px);
@@ -423,47 +414,25 @@
     .train-tile:hover { background: rgba(139, 92, 246, 0.3); border-color: #8b5cf6; transform: scale(1.05); box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); }
   }
 
-  /* ================= DEBUG PANEL ================= */
+  /* DEBUG PANEL */
   .debug-panel {
-    position: fixed;
-    bottom: 8px;
-    right: 8px;
-    z-index: 9997;
-    max-width: 320px;
-    font-family: 'Courier New', monospace;
-    font-size: 10px;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid #334155;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-    overflow: hidden;
-    transition: all 0.3s ease;
+    position: fixed; bottom: 8px; right: 8px; z-index: 9997;
+    max-width: 320px; font-family: 'Courier New', monospace; font-size: 10px;
+    background: rgba(15, 23, 42, 0.95); border: 1px solid #334155;
+    border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    overflow: hidden; transition: all 0.3s ease;
   }
-  .debug-panel.collapsed {
-    max-width: 50px;
-    max-height: 40px;
-  }
+  .debug-panel.collapsed { max-width: 50px; max-height: 40px; }
   .debug-panel.collapsed .debug-body,
   .debug-panel.collapsed .debug-header-title { display: none; }
   .debug-header {
     background: linear-gradient(135deg, #1e293b, #0f172a);
-    padding: 6px 10px;
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer;
-    border-bottom: 1px solid #334155;
-    font-weight: bold;
-    color: #60a5fa;
+    padding: 6px 10px; display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; border-bottom: 1px solid #334155;
+    font-weight: bold; color: #60a5fa;
   }
-  .debug-body {
-    max-height: 300px;
-    overflow-y: auto;
-    padding: 8px;
-  }
-  .debug-section {
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px dashed #334155;
-  }
+  .debug-body { max-height: 320px; overflow-y: auto; padding: 8px; }
+  .debug-section { margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #334155; }
   .debug-section:last-child { border-bottom: none; }
   .debug-label { color: #94a3b8; font-weight: bold; margin-bottom: 3px; }
   .debug-value { color: #f8fafc; }
@@ -471,26 +440,16 @@
   .debug-value.warn { color: #f59e0b; }
   .debug-value.bad { color: #ef4444; }
   .debug-btn {
-    padding: 3px 6px;
-    background: #334155;
-    color: #f8fafc;
-    border: 1px solid #475569;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 9px;
-    margin: 1px;
-    font-family: inherit;
+    padding: 3px 6px; background: #334155; color: #f8fafc;
+    border: 1px solid #475569; border-radius: 4px; cursor: pointer;
+    font-size: 9px; margin: 1px; font-family: inherit;
   }
   .debug-btn:hover { background: #475569; }
   .debug-btn.active { background: #fbbf24; color: #0f172a; font-weight: bold; }
   .debug-log {
-    max-height: 100px;
-    overflow-y: auto;
-    background: #020617;
-    border-radius: 4px;
-    padding: 4px;
-    font-size: 9px;
-    line-height: 1.3;
+    max-height: 120px; overflow-y: auto;
+    background: #020617; border-radius: 4px; padding: 4px;
+    font-size: 9px; line-height: 1.3;
   }
   .debug-log-entry { color: #64748b; }
   .debug-log-entry.event { color: #60a5fa; }
@@ -503,15 +462,14 @@
 
 <div class="app-container">
 
-  <!-- HEADER -->
   <header class="header-bar">
     <div class="flex items-center gap-2 min-w-0 flex-1">
       <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-sm sm:text-xl text-white shadow-lg shadow-blue-500/30 shrink-0">M</div>
       <div class="min-w-0">
         <h1 class="text-sm sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent truncate">
-          MONOPOLY NGAWILAND
+          MONOPOLY NUSANTARA
         </h1>
-        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Debug Edition</p>
+        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Ultimate Fix Edition</p>
       </div>
     </div>
 
@@ -532,20 +490,16 @@
     </div>
   </header>
 
-  <!-- MAIN -->
   <div class="main-layout">
-
-    <!-- BOARD SECTION -->
     <section class="board-wrapper">
       <div class="relative w-full flex justify-center">
         <div id="board-grid" class="monopoly-board">
-          <!-- CENTER -->
-          <div class="bg-slate-900/95 flex flex-col justify-between border border-slate-800/80 rounded-lg m-1 relative overflow-hidden shadow-inner center-content" style="grid-column: 2 / 11; grid-row: 2 / 11; overflow-y: auto; padding: 8px;">
+          <div class="bg-slate-900/95 flex flex-col justify-between border border-slate-800/80 rounded-lg m-1 relative overflow-hidden shadow-inner" style="grid-column: 2 / 11; grid-row: 2 / 11; overflow-y: auto; padding: 8px;">
             <div class="text-center">
               <div class="inline-block bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white text-xs sm:text-xl font-black px-3 sm:px-6 py-0.5 sm:py-1.5 rounded-md shadow-lg tracking-wider border border-red-400/30 uppercase transform -rotate-3">
                 MONOPOLY
               </div>
-              <p class="text-[8px] sm:text-xs text-slate-400 mt-1 font-medium tracking-wide hidden sm:block">NGAWI EDITION-Berpetualanglah mencari para member JMK48 di setiap sudut kotanya!</p>
+              <p class="text-[8px] sm:text-xs text-slate-400 mt-1 font-medium tracking-wide hidden sm:block">NUSANTARA EDITION</p>
             </div>
 
             <div class="flex flex-col items-center justify-center gap-2 sm:gap-4 my-auto">
@@ -591,7 +545,6 @@
       </div>
     </section>
 
-    <!-- SIDEBAR -->
     <section class="flex flex-col gap-3">
       <div class="glass-panel p-3 sm:p-4">
         <div class="collapsible-header flex items-center justify-between mb-2 pb-2 border-b border-slate-800" onclick="toggleCollapse('players-content', this)">
@@ -664,7 +617,7 @@
       <div>Last tick round: <span id="dbg-ult-tick" class="debug-value">0</span></div>
     </div>
     <div class="debug-section">
-      <div class="debug-label">🎮 MANUAL CONTROLS</div>
+      <div class="debug-label">🎮 MANUAL</div>
       <button class="debug-btn" onclick="dbgForceUltimate('rongawi')">👑 Rongawi</button>
       <button class="debug-btn" onclick="dbgForceUltimate('storm')">🌪️ Storm</button>
       <button class="debug-btn" onclick="dbgForceUltimate('tax')">💰 Tax</button>
@@ -674,6 +627,9 @@
       <button class="debug-btn" onclick="dbgGiveToken()">🚂 +Train</button>
       <button class="debug-btn" onclick="dbgGiveMoney()">💰 +$1000</button>
       <button class="debug-btn" onclick="dbgNextTurn()">⏭️ Force End Turn</button>
+      <br>
+      <button class="debug-btn" onclick="dbgGiveRongawiToAI()">🤖 AI Dapat Rongawi (37+39)</button>
+      <button class="debug-btn" onclick="dbgGiveRongawiToMe()">👤 Aku Dapat Rongawi (37+39)</button>
     </div>
     <div class="debug-section">
       <div class="debug-label">📋 EVENT LOG</div>
@@ -836,16 +792,17 @@ function updateDebugPanel() {
 
 /* ============================================================ DEBUG CONTROLS ============================================================ */
 function dbgForceUltimate(type) {
-  if (state.ultimate.active) {
-    dbg('Ultimate sudah aktif, deactivate dulu', 'warn');
-    return;
-  }
-  // Paksa AI punya tile Rongawi
+  if (state.ultimate.active) { dbg('Ultimate sudah aktif', 'warn'); return; }
   const tile = BOARD_TILES.find(t => t.isUltimateTile);
   if (state.propertyOwners[tile.id] === undefined) {
-    state.propertyOwners[tile.id] = 1; // AI
+    state.propertyOwners[tile.id] = 1;
     markTileOwner(tile.id, 1);
     dbg(`AI dipaksa punya ${tile.name}`, 'event');
+  }
+  // Give AI full darkblue group
+  if (state.propertyOwners[37] === undefined) {
+    state.propertyOwners[37] = 1;
+    markTileOwner(37, 1);
   }
   dbg(`Force activate ultimate: ${type}`, 'ultimate');
   activateUltimate(1, type);
@@ -876,6 +833,26 @@ function dbgNextTurn() {
     state.phase = 'end-turn';
     handleEndTurn();
   }
+}
+function dbgGiveRongawiToAI() {
+  state.propertyOwners[37] = 1;
+  state.propertyOwners[39] = 1;
+  markTileOwner(37, 1);
+  markTileOwner(39, 1);
+  PLAYERS[1].properties = [37, 39];
+  updatePlayersUI();
+  dbg('AI dapat Rongawi 37+39', 'event');
+  addLog(`🤖 AI sekarang punya full Kekaisaran Rongawi! Ultimate bisa terpicu!`, 'ultimate');
+}
+function dbgGiveRongawiToMe() {
+  state.propertyOwners[37] = 0;
+  state.propertyOwners[39] = 0;
+  markTileOwner(37, 0);
+  markTileOwner(39, 0);
+  PLAYERS[0].properties = [37, 39];
+  updatePlayersUI();
+  dbg('Kamu dapat Rongawi 37+39', 'event');
+  addLog(`👤 Kamu sekarang punya full Kekaisaran Rongawi! Ultimate bisa terpicu!`, 'ultimate');
 }
 
 /* ============================================================ COLLAPSE ============================================================ */
@@ -1015,7 +992,7 @@ const state = {
     type: null,
     ownerId: null,
     roundsLeft: 0,
-    lastTickRound: 0,      // <-- FIX: track ronde terakhir tick
+    lastTickRound: 0,
     originalOwners: {},
     originalHouses: {},
     originalMortgaged: {}
@@ -1028,7 +1005,7 @@ const ULTIMATE_TYPES = {
   rongawi: { name: 'KEKAISARAN RONGAWI SUCI', icon: '👑', duration: 2, desc: 'Semua properti kena PAJAK 2× sewa ke pemilik selama 2 ronde!', boardClass: 'ultimate-active' },
   storm:   { name: 'BADAI NUSANTARA',         icon: '🌪️', duration: 2, desc: 'Semua lawan mundur 5 & bayar $50 tiap ronde!', boardClass: 'storm-active' },
   tax:     { name: 'PAJAK KEKAISARAN',        icon: '💰', duration: 2, desc: 'Semua lawan bayar 10% kekayaan ke pemilik tiap ronde!', boardClass: 'ultimate-active' },
-  fury:    { name: 'AMUKAN RONGAWI',          icon: '🔥', duration: 2, desc: 'Semua properti pemilik upgrade +1 rumah!', boardClass: 'ultimate-active' }
+  fury:    { name: 'AMUKAN RONGAWI',          icon: '🔥', duration: 2, desc: 'Semua properti pemilik upgrade +1 rumah tiap ronde!', boardClass: 'ultimate-active' }
 };
 
 /* ============================================================ INIT ============================================================ */
@@ -1126,9 +1103,9 @@ function updatePlayersUI() {
     card.className = `p-2.5 rounded-xl border transition-all duration-500 ${
       isActive ? `${p.border} bg-slate-900/90 shadow-lg ring-1` : 'border-slate-800 bg-slate-950/40 opacity-70'
     }`;
-    const propCount = Object.keys(state.propertyOwners).filter(tid => state.propertyOwners[tid] === p.id).length;
+    const propCount = Object.keys(state.propertyOwners).filter(tid => Number(state.propertyOwners[tid]) === Number(p.id)).length;
     const totalHouses = Object.keys(state.propertyHouses)
-      .filter(tid => state.propertyOwners[tid] === p.id)
+      .filter(tid => Number(state.propertyOwners[tid]) === Number(p.id))
       .reduce((sum, tid) => sum + state.propertyHouses[tid], 0);
 
     card.innerHTML = `
@@ -1139,7 +1116,7 @@ function updatePlayersUI() {
             <div class="font-extrabold text-[11px] sm:text-xs text-slate-200 flex items-center gap-1 flex-wrap">
               ${p.name}
               ${isActive ? `<span class="text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full font-bold">TURN</span>` : ''}
-              ${state.ultimate.active && state.ultimate.ownerId === p.id ? `<span class="ultimate-badge">${ULTIMATE_TYPES[state.ultimate.type].icon} ${state.ultimate.roundsLeft}</span>` : ''}
+              ${state.ultimate.active && Number(state.ultimate.ownerId) === Number(p.id) ? `<span class="ultimate-badge">${ULTIMATE_TYPES[state.ultimate.type].icon} ${state.ultimate.roundsLeft}</span>` : ''}
               ${p.isAI && isActive ? `<span class="ai-thinking"><span></span><span></span><span></span></span>` : ''}
             </div>
             <div class="text-[9px] text-slate-400 truncate">📍 ${BOARD_TILES[p.pos].name}</div>
@@ -1184,7 +1161,7 @@ function updateActivePlayerPropertiesUI() {
   const container = document.getElementById('active-player-properties');
   container.innerHTML = '';
   const owned = Object.keys(state.propertyOwners)
-    .filter(tid => state.propertyOwners[tid] === currP.id)
+    .filter(tid => Number(state.propertyOwners[tid]) === Number(currP.id))
     .map(tid => parseInt(tid));
 
   if (owned.length === 0) {
@@ -1268,7 +1245,8 @@ function addLog(msg, type = 'normal') {
 /* ============================================================ PROPERTY CARD ============================================================ */
 function renderPropertyCard(tile, opts = {}) {
   const { showActions = false, actionContext = 'view', player = null } = opts;
-  const ownerId = state.propertyOwners[tile.id];
+  const rawOwner = state.propertyOwners[tile.id];
+  const ownerId = rawOwner !== undefined ? Number(rawOwner) : undefined;
   const owner = ownerId !== undefined ? PLAYERS[ownerId] : null;
   const houses = state.propertyHouses[tile.id] || 0;
   const isMort = state.mortgaged[tile.id];
@@ -1313,8 +1291,8 @@ function renderPropertyCard(tile, opts = {}) {
   } else rentHTML = `<div class="property-card-desc">Kartu ${tile.type}</div>`;
 
   let ketBin = '';
-  if (tile.isUltimateTile) ketBin = `👑 <b>ULTIMATE</b> — Semua tile properti kena pajak 2× sewa ke pemilik selama 2 ronde!`;
-  else if (tile.houseCost) ketBin = `💵 Harga rumah: <b>$${tile.houseCost}</b> • Mortgage: <b>$${Math.floor(tile.price/2)}</b>`;
+  if (tile.isUltimateTile) ketBin = `👑 <b>ULTIMATE</b> — Saat lawan mendarat, semua properti kena pajak 2× sewa ke pemilik selama 2 ronde! (Butuh punya tile 37 juga)`;
+  else if (tile.houseCost) ketBin = `💵 Harga rumah: <b>$${tile.houseCost}</b> • Hotel: <b>$${tile.houseCost}</b> • Mortgage: <b>$${Math.floor(tile.price/2)}</b>`;
   else if (tile.type === 'tax') ketBin = `💸 Pajak: <b>$${tile.price}</b>`;
   else if (tile.type === 'railroad') ketBin = `🚂 Bisa dipakai buat <b>tembus</b>!`;
   else if (tile.type === 'go') ketBin = `💰 Lewat tile ini: <b>+$200</b>`;
@@ -1379,7 +1357,6 @@ function renderPropertyCard(tile, opts = {}) {
   `;
 }
 
-/* ============================================================ POPUP ============================================================ */
 function showPropertyCardPopup(tile) {
   if (!['property', 'railroad', 'utility', 'tax', 'jail', 'go', 'gotojail'].includes(tile.type)) {
     document.getElementById('action-banner').innerHTML = `<b>${tile.name}</b>`;
@@ -1499,12 +1476,72 @@ function showFloatingMoney(player, text) {
   setTimeout(() => el.remove(), 1400);
 }
 
+/* ============================================================ ULTIMATE TRIGGER (FIXED) ============================================================ */
+function checkUltimateTrigger(player) {
+  const tile = BOARD_TILES[player.pos];
+  if (!tile.isUltimateTile) return false;
+
+  const rawOwner = state.propertyOwners[tile.id];
+  const ownerId = rawOwner !== undefined ? Number(rawOwner) : undefined;
+  const playerId = Number(player.id);
+
+  dbg(`checkUltimateTrigger: tile=${tile.id} owner=${rawOwner}(${typeof rawOwner}) player=${player.id}(${typeof player.id})`);
+
+  // Rule 1: Tile belum dimiliki → tidak trigger
+  if (ownerId === undefined) {
+    dbg(`Tile belum dimiliki, tidak trigger`, 'event');
+    return false;
+  }
+
+  // Rule 2: Player mendarat di tanah sendiri → tidak trigger
+  if (ownerId === playerId) {
+    dbg(`Player di tanah sendiri, tidak trigger`, 'event');
+    return false;
+  }
+
+  // Rule 3: Ultimate udah aktif → tidak trigger lagi
+  if (state.ultimate.active) {
+    dbg(`Ultimate udah aktif, tidak trigger lagi`, 'warn');
+    return false;
+  }
+
+  // Rule 4: Owner harus punya full darkblue group (37 + 39)
+  const darkblueMembers = COLOR_GROUP_INFO.darkblue.members;
+  const ownsFullGroup = darkblueMembers.every(tid =>
+    Number(state.propertyOwners[tid]) === ownerId
+  );
+
+  if (!ownsFullGroup) {
+    addLog(`👑 ${PLAYERS[ownerId].name} belum punya full Kekaisaran Rongawi (butuh tile 37 & 39)`, 'ultimate');
+    dbg(`Owner ${ownerId} tidak punya full darkblue group — tidak trigger`, 'warn');
+    return false;
+  }
+
+  // Rule 5: Minimal ronde 2
+  if (state.roundCount < 2) {
+    addLog(`👑 Terlalu cepat! Ultimate baru bisa aktif mulai ronde 2.`, 'ultimate');
+    dbg(`Round < 2, tidak trigger`, 'warn');
+    return false;
+  }
+
+  // Semua rule terpenuhi → TRIGGER!
+  addLog(`👑 ${player.name} menginjak <b>${tile.name}</b> milik ${PLAYERS[ownerId].name}!`, 'ultimate');
+  addLog(`👑 ULTIMATE TERPICU!`, 'ultimate');
+  dbg(`✅ Ultimate triggered!`, 'ultimate');
+
+  const ultKeys = ['rongawi', 'storm', 'tax', 'fury'];
+  const chosen = ultKeys[Math.floor(Math.random() * ultKeys.length)];
+  activateUltimate(ownerId, chosen);
+  return true;
+}
+
 /* ============================================================ TILE ACTIONS ============================================================ */
 function handleTileAction(player) {
   const tile = BOARD_TILES[player.pos];
   document.getElementById('action-banner').innerHTML = `Di <b>${tile.name}</b>`;
   dbg(`${player.name} landed on ${tile.name} (${tile.type})`);
 
+  // ===== 1. Efek ultimate Rongawi yang sedang aktif =====
   if (state.ultimate.active && state.ultimate.type === 'rongawi') {
     const isSpecialTile = ['corner', 'special', 'rr', 'util'].includes(tile.group);
     if (tile.type === 'property' && !isSpecialTile) {
@@ -1518,33 +1555,46 @@ function handleTileAction(player) {
     }
   }
 
-  if (checkUltimateTrigger(player)) return;
-
+  // ===== 2. Normal flow =====
   if (['property', 'railroad', 'utility'].includes(tile.type)) {
-    const ownerId = state.propertyOwners[tile.id];
+    const rawOwner = state.propertyOwners[tile.id];
+    const ownerId = rawOwner !== undefined ? Number(rawOwner) : undefined;
+    const playerId = Number(player.id);
+
+    // 2a. Belum ada owner → beli
     if (ownerId === undefined) {
       state.landedTileForBuy = tile;
       if (player.isAI) aiDecideBuy(player, tile);
       else { state.phase = 'buying'; openBuyModal(tile); }
+      return;
     }
-    else if (ownerId !== player.id) {
-      if (state.mortgaged[tile.id]) {
-        addLog(`${tile.name} di-mortgage. Tidak ada sewa.`, 'normal');
-        state.phase = 'end-turn';
-        endTurnAfterDelay();
-        return;
-      }
-      const owner = PLAYERS[ownerId];
-      const rent = calculateRent(tile, state.currentDiceTotal);
-      addLog(`💸 ${player.name} bayar sewa <b>$${rent}</b> ke ${owner.name}`, 'tax');
-      dbg(`Rent: ${player.name} pays $${rent} to ${owner.name}`);
-      attemptPayment(player, rent, owner.id, `sewa ${tile.name}`);
-    }
-    else {
+
+    // 2b. Milik sendiri → tidak ada trigger
+    if (ownerId === playerId) {
       addLog(`${player.name} di properti sendiri: <b>${tile.name}</b>`, 'normal');
       state.phase = 'end-turn';
       endTurnAfterDelay();
+      return;
     }
+
+    // 2c. Milik orang lain → cek ultimate trigger DULU
+    if (checkUltimateTrigger(player)) {
+      dbg(`Ultimate triggered, aborts normal tile action`, 'ultimate');
+      return;
+    }
+
+    // 2d. Bayar sewa normal
+    if (state.mortgaged[tile.id]) {
+      addLog(`${tile.name} di-mortgage. Tidak ada sewa.`, 'normal');
+      state.phase = 'end-turn';
+      endTurnAfterDelay();
+      return;
+    }
+    const owner = PLAYERS[ownerId];
+    const rent = calculateRent(tile, state.currentDiceTotal);
+    addLog(`💸 ${player.name} bayar sewa <b>$${rent}</b> ke ${owner.name}`, 'tax');
+    dbg(`Rent: ${player.name} pays $${rent} to ${owner.name}`);
+    attemptPayment(player, rent, owner.id, `sewa ${tile.name}`);
   }
   else if (tile.type === 'tax') {
     addLog(`${player.name} bayar <b>${tile.name}</b>: $${tile.price}`, 'tax');
@@ -1573,18 +1623,21 @@ function calculateRent(tile, diceTotal) {
   if (tile.type === 'property') {
     const houses = state.propertyHouses[tile.id] || 0;
     if (houses > 0) return tile.rent[houses];
-    const owner = state.propertyOwners[tile.id];
+    const rawOwner = state.propertyOwners[tile.id];
+    const owner = rawOwner !== undefined ? Number(rawOwner) : undefined;
     if (hasFullColorGroup(owner, tile.group)) return tile.rent[0] * 2;
     return tile.rent[0];
   }
   if (tile.type === 'railroad') {
-    const owner = state.propertyOwners[tile.id];
-    const count = BOARD_TILES.filter(t => t.type === 'railroad' && state.propertyOwners[t.id] === owner).length;
+    const rawOwner = state.propertyOwners[tile.id];
+    const owner = rawOwner !== undefined ? Number(rawOwner) : undefined;
+    const count = BOARD_TILES.filter(t => t.type === 'railroad' && Number(state.propertyOwners[t.id]) === owner).length;
     return tile.rent[Math.max(0, count - 1)];
   }
   if (tile.type === 'utility') {
-    const owner = state.propertyOwners[tile.id];
-    const count = BOARD_TILES.filter(t => t.type === 'utility' && state.propertyOwners[t.id] === owner).length;
+    const rawOwner = state.propertyOwners[tile.id];
+    const owner = rawOwner !== undefined ? Number(rawOwner) : undefined;
+    const count = BOARD_TILES.filter(t => t.type === 'utility' && Number(state.propertyOwners[t.id]) === owner).length;
     return diceTotal * tile.rent[Math.max(0, count - 1)];
   }
   return 0;
@@ -1592,34 +1645,24 @@ function calculateRent(tile, diceTotal) {
 
 function hasFullColorGroup(playerId, group) {
   if (!group || !COLOR_GROUP_INFO[group]) return false;
-  return COLOR_GROUP_INFO[group].members.every(tid => state.propertyOwners[tid] === playerId);
+  const members = COLOR_GROUP_INFO[group].members;
+  return members.every(tid => Number(state.propertyOwners[tid]) === Number(playerId));
 }
 
-/* ============================================================ ULTIMATE ============================================================ */
-function checkUltimateTrigger(player) {
-  const tile = BOARD_TILES[player.pos];
-  if (!tile.isUltimateTile) return false;
-  const ownerId = state.propertyOwners[tile.id];
-  if (ownerId === undefined || ownerId === player.id) return false;
-  if (state.ultimate.active) return false;
-  addLog(`👑 ${player.name} menginjak <b>${tile.name}</b>! Ultimate terpicu!`, 'ultimate');
-  dbg(`Ultimate triggered by ${player.name}`, 'ultimate');
-  const ultKeys = ['rongawi', 'storm', 'tax', 'fury'];
-  const chosen = ultKeys[Math.floor(Math.random() * ultKeys.length)];
-  activateUltimate(ownerId, chosen);
-  return true;
-}
-
+/* ============================================================ ULTIMATE ACTIVATION ============================================================ */
 function activateUltimate(ownerId, type = 'rongawi') {
+  ownerId = Number(ownerId);
   if (state.ultimate.active) { dbg('Ultimate already active, skip', 'warn'); return; }
   const owner = PLAYERS[ownerId];
+  if (!owner) { dbg(`Owner ${ownerId} tidak ditemukan!`, 'error'); return; }
+
   const ult = ULTIMATE_TYPES[type];
+  if (!ult) { dbg(`Ultimate type ${type} tidak valid!`, 'error'); return; }
 
   addLog(`${ult.icon} <b>${ult.name} oleh ${owner.name}!</b>`, 'ultimate');
   addLog(`${ult.desc} (${ult.duration} ronde)`, 'ultimate');
   dbg(`ACTIVATE ${type} by ${owner.name}, duration=${ult.duration}, currentRound=${state.roundCount}`, 'ultimate');
 
-  // Snapshot
   state.ultimate.originalOwners = JSON.parse(JSON.stringify(state.propertyOwners));
   state.ultimate.originalHouses = JSON.parse(JSON.stringify(state.propertyHouses));
   state.ultimate.originalMortgaged = JSON.parse(JSON.stringify(state.mortgaged));
@@ -1628,7 +1671,7 @@ function activateUltimate(ownerId, type = 'rongawi') {
   state.ultimate.type = type;
   state.ultimate.ownerId = ownerId;
   state.ultimate.roundsLeft = ult.duration;
-  state.ultimate.lastTickRound = state.roundCount;   // <-- FIX: track ronde aktivasi
+  state.ultimate.lastTickRound = state.roundCount;
 
   if (type === 'storm') applyStorm(ownerId);
   if (type === 'fury') applyFury(ownerId);
@@ -1648,7 +1691,7 @@ function activateUltimate(ownerId, type = 'rongawi') {
 function applyStorm(ownerId) {
   const owner = PLAYERS[ownerId];
   PLAYERS.forEach(p => {
-    if (p.id === ownerId || p.bankrupt) return;
+    if (Number(p.id) === Number(ownerId) || p.bankrupt) return;
     const oldPos = p.pos;
     p.pos = Math.max(0, p.pos - 5);
     p.money -= 50;
@@ -1663,7 +1706,7 @@ function applyFury(ownerId) {
   const owner = PLAYERS[ownerId];
   let count = 0;
   BOARD_TILES.forEach(t => {
-    if (state.propertyOwners[t.id] === ownerId && t.type === 'property') {
+    if (Number(state.propertyOwners[t.id]) === Number(ownerId) && t.type === 'property') {
       const houses = state.propertyHouses[t.id] || 0;
       if (houses < 5) {
         state.propertyHouses[t.id] = houses + 1;
@@ -1695,11 +1738,9 @@ function showUltimateOverlay(ult, owner) {
   setTimeout(() => overlay.remove(), 3400);
 }
 
-/* ============ FIXED tickUltimate ============ */
 function tickUltimate() {
   if (!state.ultimate.active) return;
 
-  // Safety
   if (typeof state.ultimate.roundsLeft !== 'number' || isNaN(state.ultimate.roundsLeft)) {
     addLog(`⚠️ Ultimate corrupted, auto-deactivate`, 'ultimate');
     dbg('Ultimate corrupted!', 'error');
@@ -1707,7 +1748,6 @@ function tickUltimate() {
     return;
   }
 
-  // Cek apakah ronde ini udah pernah di-tick (guard anti double-tick)
   if (state.ultimate.lastTickRound === state.roundCount) {
     dbg(`tickUltimate: ronde ${state.roundCount} udah pernah tick, skip`, 'warn');
     return;
@@ -1719,13 +1759,12 @@ function tickUltimate() {
   addLog(`${ult.icon} ${ult.name} — sisa ${state.ultimate.roundsLeft} ronde`, 'ultimate');
   dbg(`Tick ultimate: roundsLeft=${state.ultimate.roundsLeft}, round=${state.roundCount}`, 'ultimate');
 
-  // Tax ultimate effect per ronde
   if (state.ultimate.type === 'tax') {
     const owner = PLAYERS[state.ultimate.ownerId];
     PLAYERS.forEach(p => {
-      if (p.id === owner.id || p.bankrupt) return;
+      if (Number(p.id) === Number(owner.id) || p.bankrupt) return;
       const netWorth = p.money + Object.keys(state.propertyOwners)
-        .filter(tid => state.propertyOwners[tid] === p.id)
+        .filter(tid => Number(state.propertyOwners[tid]) === Number(p.id))
         .reduce((sum, tid) => sum + (BOARD_TILES[tid].price || 0), 0);
       const tax = Math.floor(netWorth * 0.10);
       addLog(`💰 ${p.name} pajak 10% = <b>$${tax}</b>`, 'ultimate');
@@ -1735,11 +1774,10 @@ function tickUltimate() {
     updatePlayersUI();
   }
 
-  // Storm effect per ronde
   if (state.ultimate.type === 'storm') {
     const owner = PLAYERS[state.ultimate.ownerId];
     PLAYERS.forEach(p => {
-      if (p.id === owner.id || p.bankrupt) return;
+      if (Number(p.id) === Number(owner.id) || p.bankrupt) return;
       const oldPos = p.pos;
       p.pos = Math.max(0, p.pos - 5);
       p.money -= 50;
@@ -1750,7 +1788,6 @@ function tickUltimate() {
     updatePlayersUI();
   }
 
-  // Fury effect per ronde
   if (state.ultimate.type === 'fury') {
     applyFury(state.ultimate.ownerId);
   }
@@ -1764,23 +1801,19 @@ function tickUltimate() {
   }
 }
 
-/* ============ FIXED deactivateUltimate ============ */
 function deactivateUltimate() {
   if (!state.ultimate.active) return;
   const ult = ULTIMATE_TYPES[state.ultimate.type];
   addLog(`${ult.icon} <b>${ult.name} berakhir.</b>`, 'ultimate');
 
-  // Restore properti yang MASIH ada (yang dijual saat ultimate tetap kosong)
   const currentTileIds = Object.keys(state.propertyOwners);
-  const restoredOwners = { ...state.ultimate.originalOwners };
+  const restoredOwners = {};
   const restoredHouses = { ...state.ultimate.originalHouses };
   const restoredMortgaged = { ...state.ultimate.originalMortgaged };
 
-  Object.keys(restoredOwners).forEach(tid => {
-    if (!currentTileIds.includes(tid)) {
-      delete restoredOwners[tid];
-      delete restoredHouses[tid];
-      delete restoredMortgaged[tid];
+  Object.keys(state.ultimate.originalOwners).forEach(tid => {
+    if (currentTileIds.includes(tid)) {
+      restoredOwners[tid] = Number(state.ultimate.originalOwners[tid]);
     }
   });
 
@@ -1805,10 +1838,13 @@ function deactivateUltimate() {
   });
 
   Object.keys(state.propertyOwners).forEach(tid => {
-    markTileOwner(parseInt(tid), state.propertyOwners[tid]);
-    if (state.mortgaged[tid]) {
-      const el = document.getElementById(`tile-${tid}`);
-      if (el) el.classList.add('tile-mortgaged');
+    const ownerId = Number(state.propertyOwners[tid]);
+    if (!isNaN(ownerId)) {
+      markTileOwner(parseInt(tid), ownerId);
+      if (state.mortgaged[tid]) {
+        const el = document.getElementById(`tile-${tid}`);
+        if (el) el.classList.add('tile-mortgaged');
+      }
     }
   });
   Object.keys(state.propertyHouses).forEach(tid => {
@@ -1859,7 +1895,7 @@ function declareBankruptcy() {
   player.bankrupt = true;
   player.money = 0;
   Object.keys(state.propertyOwners).forEach(tid => {
-    if (state.propertyOwners[tid] === player.id) {
+    if (Number(state.propertyOwners[tid]) === Number(player.id)) {
       if (debt.creditorId !== null) state.propertyOwners[tid] = debt.creditorId;
       else { delete state.propertyOwners[tid]; delete state.propertyHouses[tid]; delete state.mortgaged[tid]; }
     }
@@ -1895,7 +1931,7 @@ function checkDebtResolved() {
 function openManageModal() {
   const modal = document.getElementById('modal-manage');
   const player = PLAYERS[0];
-  const owned = BOARD_TILES.filter(t => state.propertyOwners[t.id] === player.id);
+  const owned = BOARD_TILES.filter(t => Number(state.propertyOwners[t.id]) === Number(player.id));
 
   document.getElementById('modal-manage-header').innerHTML = `
     <div class="flex items-center justify-between">
@@ -2038,7 +2074,7 @@ function doSellLand(playerId, tileId) {
   const player = PLAYERS[playerId];
   const tile = BOARD_TILES[tileId];
   if ((state.propertyHouses[tileId] || 0) > 0) return;
-  if (state.propertyOwners[tileId] !== playerId) return;
+  if (Number(state.propertyOwners[tileId]) !== Number(playerId)) return;
   const refund = Math.floor(tile.price / 2);
   player.money += refund;
   delete state.propertyOwners[tileId];
@@ -2115,7 +2151,7 @@ function aiHandleDebt(player) {
     let safety = 0;
     while (player.money < target && safety < 100) {
       safety++;
-      const owned = BOARD_TILES.filter(t => state.propertyOwners[t.id] === player.id && (state.propertyHouses[t.id] || 0) > 0);
+      const owned = BOARD_TILES.filter(t => Number(state.propertyOwners[t.id]) === Number(player.id) && (state.propertyHouses[t.id] || 0) > 0);
       let sold = false;
       for (const tile of owned) {
         if (canSellHouseFn(player, tile)) {
@@ -2133,7 +2169,7 @@ function aiHandleDebt(player) {
     safety = 0;
     while (player.money < target && safety < 100) {
       safety++;
-      const mortgagable = BOARD_TILES.filter(t => state.propertyOwners[t.id] === player.id && !state.mortgaged[t.id] && (state.propertyHouses[t.id] || 0) === 0);
+      const mortgagable = BOARD_TILES.filter(t => Number(state.propertyOwners[t.id]) === Number(player.id) && !state.mortgaged[t.id] && (state.propertyHouses[t.id] || 0) === 0);
       if (mortgagable.length === 0) break;
       const tile = mortgagable[0];
       state.mortgaged[tile.id] = true;
@@ -2144,7 +2180,7 @@ function aiHandleDebt(player) {
     safety = 0;
     while (player.money < target && safety < 100) {
       safety++;
-      const sellable = BOARD_TILES.filter(t => state.propertyOwners[t.id] === player.id && !state.mortgaged[t.id] && (state.propertyHouses[t.id] || 0) === 0 && t.price > 0);
+      const sellable = BOARD_TILES.filter(t => Number(state.propertyOwners[t.id]) === Number(player.id) && !state.mortgaged[t.id] && (state.propertyHouses[t.id] || 0) === 0 && t.price > 0);
       if (sellable.length === 0) break;
       const tile = sellable[0];
       player.money += Math.floor(tile.price / 2);
@@ -2167,7 +2203,7 @@ function aiHandleDebt(player) {
     } else {
       player.bankrupt = true;
       Object.keys(state.propertyOwners).forEach(tid => {
-        if (state.propertyOwners[tid] === player.id) {
+        if (Number(state.propertyOwners[tid]) === Number(player.id)) {
           if (debt.creditorId !== null) state.propertyOwners[tid] = debt.creditorId;
           else { delete state.propertyOwners[tid]; delete state.propertyHouses[tid]; delete state.mortgaged[tid]; }
         }
@@ -2187,7 +2223,7 @@ function aiTryBuildHouses() {
   const buffer = 300;
   if (player.money <= buffer) return;
   const buildable = BOARD_TILES.filter(t =>
-    state.propertyOwners[t.id] === player.id && t.type === 'property' && !state.mortgaged[t.id] &&
+    Number(state.propertyOwners[t.id]) === Number(player.id) && t.type === 'property' && !state.mortgaged[t.id] &&
     hasFullColorGroup(player.id, t.group) && player.money >= t.houseCost + buffer &&
     (canBuildHouse(player, t) || canUpgradeToHotel(player, t))
   );
@@ -2237,9 +2273,9 @@ function declineBuyProperty() {
 }
 
 function markTileOwner(tileId, playerId) {
-  const player = PLAYERS[playerId];
+  const player = PLAYERS[Number(playerId)];
   const tileEl = document.getElementById(`tile-${tileId}`);
-  if (!tileEl) return;
+  if (!tileEl || !player) return;
   tileEl.style.setProperty('--owner-color', player.hex);
   tileEl.style.setProperty('--owner-glow', player.hex + '80');
   tileEl.classList.add('tile-owned');
@@ -2336,7 +2372,8 @@ function triggerChanceCard(player, type) {
   }
   else if (card.triggerUltimate) {
     const rongawiTile = BOARD_TILES.find(t => t.isUltimateTile);
-    const ownerId = state.propertyOwners[rongawiTile.id];
+    const rawOwner = state.propertyOwners[rongawiTile.id];
+    const ownerId = rawOwner !== undefined ? Number(rawOwner) : undefined;
     if (ownerId !== undefined && !state.ultimate.active) {
       const ultKeys = ['rongawi', 'storm', 'tax', 'fury'];
       const chosen = ultKeys[Math.floor(Math.random() * ultKeys.length)];
@@ -2384,7 +2421,7 @@ function useCard(idx) {
 
   if (card.type === 'cancel') {
     if (!state.ultimate.active) { document.getElementById('action-banner').innerHTML = `❌ Tidak ada Ultimate aktif.`; return; }
-    if (state.ultimate.ownerId === player.id) { document.getElementById('action-banner').innerHTML = `❌ Tidak bisa batalkan Ultimate sendiri!`; return; }
+    if (Number(state.ultimate.ownerId) === Number(player.id)) { document.getElementById('action-banner').innerHTML = `❌ Tidak bisa batalkan Ultimate sendiri!`; return; }
     const modal = document.getElementById('modal-cancel-ultimate');
     modal.classList.remove('hidden');
     setTimeout(() => modal.querySelector('.modal-anim').classList.remove('scale-95', 'opacity-0'), 20);
@@ -2609,7 +2646,7 @@ function closeModal(id) {
   } else m.classList.add('hidden');
 }
 
-/* ============================================================ END TURN (FIXED) ============================================================ */
+/* ============================================================ END TURN ============================================================ */
 function endTurnAfterDelay() {
   const player = PLAYERS[state.currentTurnIndex];
   if (state.doublesCount > 0 && !player.inJail && player.money >= 0 && !player.bankrupt) {
@@ -2650,21 +2687,18 @@ function handleEndTurn() {
 
   state.doublesCount = 0;
 
-  // === FIX: track ronde sebelumnya ===
   const prevTurnIdx = state.currentTurnIndex;
 
   do {
     state.currentTurnIndex = (state.currentTurnIndex + 1) % PLAYERS.length;
   } while (PLAYERS[state.currentTurnIndex].bankrupt);
 
-  // === FIX: ronde baru hanya kalau current balik ke 0 (bukan cuma karena wrap) ===
   const isNewRound = state.currentTurnIndex === 0 && prevTurnIdx !== 0;
   dbg(`endTurn: prevIdx=${prevTurnIdx} newIdx=${state.currentTurnIndex} isNewRound=${isNewRound}`);
 
   if (isNewRound) {
     state.roundCount++;
     dbg(`NEW ROUND → ${state.roundCount}`, 'event');
-    // Ultimate tick hanya saat ronde baru bener-bener mulai
     if (state.ultimate.active) {
       dbg(`Will tick ultimate (roundsLeft=${state.ultimate.roundsLeft})`, 'ultimate');
       tickUltimate();
@@ -2756,7 +2790,7 @@ function triggerWinner(winner) {
   playSound('win');
   document.getElementById('winner-name').innerText = `${winner.token} ${winner.name}`;
   document.getElementById('winner-cash').innerText = `$${winner.money}`;
-  const count = Object.values(state.propertyOwners).filter(id => id === winner.id).length;
+  const count = Object.values(state.propertyOwners).filter(id => Number(id) === Number(winner.id)).length;
   document.getElementById('winner-props').innerText = count;
   document.getElementById('modal-winner').classList.remove('hidden');
   startConfetti();
