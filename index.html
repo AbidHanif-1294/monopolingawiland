@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Monopoly Nusantara — Ultimate Fix</title>
+<title>Monopoly Nusantara — Ultimate Edition</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
@@ -171,9 +171,6 @@
   .collapsible-content.open { max-height: 2000px; opacity: 1; }
   .collapsible-header { cursor: pointer; user-select: none; transition: background 0.2s; }
   .collapsible-header:hover { background: rgba(51, 65, 85, 0.3); }
-
-  .btn-press { transition: transform 0.15s ease; }
-  .btn-press:active:not(:disabled) { transform: scale(0.94); }
 
   .money-float {
     position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
@@ -413,49 +410,6 @@
   @media (hover: hover) {
     .train-tile:hover { background: rgba(139, 92, 246, 0.3); border-color: #8b5cf6; transform: scale(1.05); box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); }
   }
-
-  /* DEBUG PANEL */
-  .debug-panel {
-    position: fixed; bottom: 8px; right: 8px; z-index: 9997;
-    max-width: 320px; font-family: 'Courier New', monospace; font-size: 10px;
-    background: rgba(15, 23, 42, 0.95); border: 1px solid #334155;
-    border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-    overflow: hidden; transition: all 0.3s ease;
-  }
-  .debug-panel.collapsed { max-width: 50px; max-height: 40px; }
-  .debug-panel.collapsed .debug-body,
-  .debug-panel.collapsed .debug-header-title { display: none; }
-  .debug-header {
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    padding: 6px 10px; display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; border-bottom: 1px solid #334155;
-    font-weight: bold; color: #60a5fa;
-  }
-  .debug-body { max-height: 320px; overflow-y: auto; padding: 8px; }
-  .debug-section { margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #334155; }
-  .debug-section:last-child { border-bottom: none; }
-  .debug-label { color: #94a3b8; font-weight: bold; margin-bottom: 3px; }
-  .debug-value { color: #f8fafc; }
-  .debug-value.good { color: #10b981; }
-  .debug-value.warn { color: #f59e0b; }
-  .debug-value.bad { color: #ef4444; }
-  .debug-btn {
-    padding: 3px 6px; background: #334155; color: #f8fafc;
-    border: 1px solid #475569; border-radius: 4px; cursor: pointer;
-    font-size: 9px; margin: 1px; font-family: inherit;
-  }
-  .debug-btn:hover { background: #475569; }
-  .debug-btn.active { background: #fbbf24; color: #0f172a; font-weight: bold; }
-  .debug-log {
-    max-height: 120px; overflow-y: auto;
-    background: #020617; border-radius: 4px; padding: 4px;
-    font-size: 9px; line-height: 1.3;
-  }
-  .debug-log-entry { color: #64748b; }
-  .debug-log-entry.event { color: #60a5fa; }
-  .debug-log-entry.warn { color: #f59e0b; }
-  .debug-log-entry.error { color: #ef4444; }
-  .debug-log-entry.ultimate { color: #fbbf24; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -469,7 +423,7 @@
         <h1 class="text-sm sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent truncate">
           MONOPOLY NUSANTARA
         </h1>
-        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Ultimate Fix Edition</p>
+        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Ultimate Edition</p>
       </div>
     </div>
 
@@ -593,51 +547,6 @@
   </div>
 </div>
 
-<!-- DEBUG PANEL -->
-<div id="debug-panel" class="debug-panel">
-  <div class="debug-header" onclick="toggleDebugPanel()">
-    <span>🐛 <span class="debug-header-title">DEBUG</span></span>
-    <span id="debug-toggle-icon">−</span>
-  </div>
-  <div class="debug-body">
-    <div class="debug-section">
-      <div class="debug-label">📍 STATE</div>
-      <div>Ronde: <span id="dbg-round" class="debug-value">1</span></div>
-      <div>Turn idx: <span id="dbg-turn-idx" class="debug-value">0</span></div>
-      <div>Phase: <span id="dbg-phase" class="debug-value">-</span></div>
-      <div>Dice: <span id="dbg-dice" class="debug-value">-</span></div>
-      <div>Doubles: <span id="dbg-doubles" class="debug-value">0</span></div>
-    </div>
-    <div class="debug-section">
-      <div class="debug-label">👑 ULTIMATE</div>
-      <div>Active: <span id="dbg-ult-active" class="debug-value bad">NO</span></div>
-      <div>Type: <span id="dbg-ult-type" class="debug-value">-</span></div>
-      <div>Owner: <span id="dbg-ult-owner" class="debug-value">-</span></div>
-      <div>Rounds left: <span id="dbg-ult-rounds" class="debug-value">0</span></div>
-      <div>Last tick round: <span id="dbg-ult-tick" class="debug-value">0</span></div>
-    </div>
-    <div class="debug-section">
-      <div class="debug-label">🎮 MANUAL</div>
-      <button class="debug-btn" onclick="dbgForceUltimate('rongawi')">👑 Rongawi</button>
-      <button class="debug-btn" onclick="dbgForceUltimate('storm')">🌪️ Storm</button>
-      <button class="debug-btn" onclick="dbgForceUltimate('tax')">💰 Tax</button>
-      <button class="debug-btn" onclick="dbgForceUltimate('fury')">🔥 Fury</button>
-      <br>
-      <button class="debug-btn" onclick="dbgForceEndUltimate()">🚫 End Ultimate</button>
-      <button class="debug-btn" onclick="dbgGiveToken()">🚂 +Train</button>
-      <button class="debug-btn" onclick="dbgGiveMoney()">💰 +$1000</button>
-      <button class="debug-btn" onclick="dbgNextTurn()">⏭️ Force End Turn</button>
-      <br>
-      <button class="debug-btn" onclick="dbgGiveRongawiToAI()">🤖 AI Dapat Rongawi (37+39)</button>
-      <button class="debug-btn" onclick="dbgGiveRongawiToMe()">👤 Aku Dapat Rongawi (37+39)</button>
-    </div>
-    <div class="debug-section">
-      <div class="debug-label">📋 EVENT LOG</div>
-      <div id="dbg-log" class="debug-log"></div>
-    </div>
-  </div>
-</div>
-
 <!-- MODALS -->
 <div id="modal-property" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
   <div class="modal-anim scale-95 opacity-0 transition-all duration-300 flex justify-center items-center w-full modal-box"></div>
@@ -748,113 +657,6 @@
 </div>
 
 <script>
-/* ============================================================ DEBUG ============================================================ */
-let debugEnabled = true;
-const debugLog = [];
-function dbg(msg, type = 'event') {
-  if (!debugEnabled) return;
-  const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  debugLog.unshift({ time, msg, type });
-  if (debugLog.length > 100) debugLog.pop();
-  renderDebugLog();
-  console.log(`[DBG ${type}]`, msg);
-}
-function renderDebugLog() {
-  const el = document.getElementById('dbg-log');
-  if (!el) return;
-  el.innerHTML = debugLog.slice(0, 15).map(e =>
-    `<div class="debug-log-entry ${e.type}">[${e.time}] ${e.msg}</div>`
-  ).join('');
-}
-function toggleDebugPanel() {
-  const panel = document.getElementById('debug-panel');
-  panel.classList.toggle('collapsed');
-  document.getElementById('debug-toggle-icon').innerText = panel.classList.contains('collapsed') ? '+' : '−';
-}
-function updateDebugPanel() {
-  if (!debugEnabled) return;
-  const s = state;
-  document.getElementById('dbg-round').innerText = s.roundCount;
-  document.getElementById('dbg-turn-idx').innerText = s.currentTurnIndex;
-  document.getElementById('dbg-phase').innerText = s.phase;
-  document.getElementById('dbg-dice').innerText = `${s.dice?.[0] || 0}+${s.dice?.[1] || 0}`;
-  document.getElementById('dbg-doubles').innerText = s.doublesCount;
-
-  const ult = s.ultimate;
-  const activeEl = document.getElementById('dbg-ult-active');
-  activeEl.innerText = ult.active ? 'YES' : 'NO';
-  activeEl.className = 'debug-value ' + (ult.active ? 'good' : 'bad');
-  document.getElementById('dbg-ult-type').innerText = ult.type || '-';
-  document.getElementById('dbg-ult-owner').innerText = ult.ownerId !== null ? PLAYERS[ult.ownerId]?.name : '-';
-  document.getElementById('dbg-ult-rounds').innerText = ult.roundsLeft;
-  document.getElementById('dbg-ult-tick').innerText = ult.lastTickRound ?? '-';
-}
-
-/* ============================================================ DEBUG CONTROLS ============================================================ */
-function dbgForceUltimate(type) {
-  if (state.ultimate.active) { dbg('Ultimate sudah aktif', 'warn'); return; }
-  const tile = BOARD_TILES.find(t => t.isUltimateTile);
-  if (state.propertyOwners[tile.id] === undefined) {
-    state.propertyOwners[tile.id] = 1;
-    markTileOwner(tile.id, 1);
-    dbg(`AI dipaksa punya ${tile.name}`, 'event');
-  }
-  // Give AI full darkblue group
-  if (state.propertyOwners[37] === undefined) {
-    state.propertyOwners[37] = 1;
-    markTileOwner(37, 1);
-  }
-  dbg(`Force activate ultimate: ${type}`, 'ultimate');
-  activateUltimate(1, type);
-}
-function dbgForceEndUltimate() {
-  if (!state.ultimate.active) { dbg('No ultimate active', 'warn'); return; }
-  dbg('Force end ultimate', 'warn');
-  deactivateUltimate();
-}
-function dbgGiveToken() {
-  state.trainTokens[0] = (state.trainTokens[0] || 0) + 1;
-  PLAYERS[0].hand.push({ type: 'train', name: 'Kereta Tembus', desc: 'Debug', icon: '🚂' });
-  updateCardHandUI();
-  updateTrainButtonUI();
-  dbg('+1 Train token untuk Kamu', 'event');
-}
-function dbgGiveMoney() {
-  PLAYERS[0].money += 1000;
-  updatePlayersUI();
-  dbg('+$1000 untuk Kamu', 'event');
-}
-function dbgNextTurn() {
-  dbg('Force end turn', 'warn');
-  if (state.phase === 'waiting-roll' || state.phase === 'end-turn') {
-    state.doublesCount = 0;
-    handleEndTurn();
-  } else {
-    state.phase = 'end-turn';
-    handleEndTurn();
-  }
-}
-function dbgGiveRongawiToAI() {
-  state.propertyOwners[37] = 1;
-  state.propertyOwners[39] = 1;
-  markTileOwner(37, 1);
-  markTileOwner(39, 1);
-  PLAYERS[1].properties = [37, 39];
-  updatePlayersUI();
-  dbg('AI dapat Rongawi 37+39', 'event');
-  addLog(`🤖 AI sekarang punya full Kekaisaran Rongawi! Ultimate bisa terpicu!`, 'ultimate');
-}
-function dbgGiveRongawiToMe() {
-  state.propertyOwners[37] = 0;
-  state.propertyOwners[39] = 0;
-  markTileOwner(37, 0);
-  markTileOwner(39, 0);
-  PLAYERS[0].properties = [37, 39];
-  updatePlayersUI();
-  dbg('Kamu dapat Rongawi 37+39', 'event');
-  addLog(`👤 Kamu sekarang punya full Kekaisaran Rongawi! Ultimate bisa terpicu!`, 'ultimate');
-}
-
 /* ============================================================ COLLAPSE ============================================================ */
 function toggleCollapse(id, headerEl) {
   const el = document.getElementById(id);
@@ -1010,7 +812,6 @@ const ULTIMATE_TYPES = {
 
 /* ============================================================ INIT ============================================================ */
 function initBoardUI() {
-  dbg('initBoardUI start');
   const grid = document.getElementById('board-grid');
   Array.from(grid.children).forEach(child => {
     if (child.style.gridColumn !== '2 / 11') child.remove();
@@ -1066,8 +867,6 @@ function initBoardUI() {
   setInitialDice();
   updateCardHandUI();
   updateTrainButtonUI();
-  updateDebugPanel();
-  dbg('initBoardUI done');
 }
 
 function setInitialDice() {
@@ -1143,7 +942,6 @@ function updatePlayersUI() {
 
   updateActivePlayerPropertiesUI();
   updateUltimateStatusBadge();
-  updateDebugPanel();
 }
 
 function updateUltimateStatusBadge() {
@@ -1380,7 +1178,6 @@ function handleRollDice() {
   state.isRolling = true;
   state.phase = 'rolling';
   document.getElementById('btn-roll-dice').disabled = true;
-  dbg(`${player.name} roll`);
 
   const dice1 = document.getElementById('dice-1');
   const dice2 = document.getElementById('dice-2');
@@ -1408,7 +1205,6 @@ function handleRollDice() {
     state.currentDiceTotal = total;
     const isDouble = val1 === val2;
     addLog(`<b>${player.name}</b>: <b>${val1}+${val2}=${total}</b>${isDouble ? ' 🎯' : ''}`, 'roll');
-    dbg(`${player.name} roll ${val1}+${val2}=${total}${isDouble ? ' DOUBLE' : ''}`);
 
     if (player.inJail) { handleJailRoll(player, val1, val2, total); return; }
 
@@ -1416,7 +1212,6 @@ function handleRollDice() {
       state.doublesCount++;
       if (state.doublesCount === 3) {
         addLog(`🚔 3x double → PENJARA!`, 'jail');
-        dbg('3x double → jail', 'warn');
         sendToJail(player);
         state.doublesCount = 0;
         state.phase = 'end-turn';
@@ -1476,7 +1271,7 @@ function showFloatingMoney(player, text) {
   setTimeout(() => el.remove(), 1400);
 }
 
-/* ============================================================ ULTIMATE TRIGGER (FIXED) ============================================================ */
+/* ============================================================ ULTIMATE TRIGGER ============================================================ */
 function checkUltimateTrigger(player) {
   const tile = BOARD_TILES[player.pos];
   if (!tile.isUltimateTile) return false;
@@ -1485,49 +1280,24 @@ function checkUltimateTrigger(player) {
   const ownerId = rawOwner !== undefined ? Number(rawOwner) : undefined;
   const playerId = Number(player.id);
 
-  dbg(`checkUltimateTrigger: tile=${tile.id} owner=${rawOwner}(${typeof rawOwner}) player=${player.id}(${typeof player.id})`);
+  if (ownerId === undefined) return false;
+  if (ownerId === playerId) return false;
+  if (state.ultimate.active) return false;
 
-  // Rule 1: Tile belum dimiliki → tidak trigger
-  if (ownerId === undefined) {
-    dbg(`Tile belum dimiliki, tidak trigger`, 'event');
-    return false;
-  }
-
-  // Rule 2: Player mendarat di tanah sendiri → tidak trigger
-  if (ownerId === playerId) {
-    dbg(`Player di tanah sendiri, tidak trigger`, 'event');
-    return false;
-  }
-
-  // Rule 3: Ultimate udah aktif → tidak trigger lagi
-  if (state.ultimate.active) {
-    dbg(`Ultimate udah aktif, tidak trigger lagi`, 'warn');
-    return false;
-  }
-
-  // Rule 4: Owner harus punya full darkblue group (37 + 39)
   const darkblueMembers = COLOR_GROUP_INFO.darkblue.members;
-  const ownsFullGroup = darkblueMembers.every(tid =>
-    Number(state.propertyOwners[tid]) === ownerId
-  );
-
+  const ownsFullGroup = darkblueMembers.every(tid => Number(state.propertyOwners[tid]) === ownerId);
   if (!ownsFullGroup) {
     addLog(`👑 ${PLAYERS[ownerId].name} belum punya full Kekaisaran Rongawi (butuh tile 37 & 39)`, 'ultimate');
-    dbg(`Owner ${ownerId} tidak punya full darkblue group — tidak trigger`, 'warn');
     return false;
   }
 
-  // Rule 5: Minimal ronde 2
   if (state.roundCount < 2) {
     addLog(`👑 Terlalu cepat! Ultimate baru bisa aktif mulai ronde 2.`, 'ultimate');
-    dbg(`Round < 2, tidak trigger`, 'warn');
     return false;
   }
 
-  // Semua rule terpenuhi → TRIGGER!
   addLog(`👑 ${player.name} menginjak <b>${tile.name}</b> milik ${PLAYERS[ownerId].name}!`, 'ultimate');
   addLog(`👑 ULTIMATE TERPICU!`, 'ultimate');
-  dbg(`✅ Ultimate triggered!`, 'ultimate');
 
   const ultKeys = ['rongawi', 'storm', 'tax', 'fury'];
   const chosen = ultKeys[Math.floor(Math.random() * ultKeys.length)];
@@ -1539,9 +1309,7 @@ function checkUltimateTrigger(player) {
 function handleTileAction(player) {
   const tile = BOARD_TILES[player.pos];
   document.getElementById('action-banner').innerHTML = `Di <b>${tile.name}</b>`;
-  dbg(`${player.name} landed on ${tile.name} (${tile.type})`);
 
-  // ===== 1. Efek ultimate Rongawi yang sedang aktif =====
   if (state.ultimate.active && state.ultimate.type === 'rongawi') {
     const isSpecialTile = ['corner', 'special', 'rr', 'util'].includes(tile.group);
     if (tile.type === 'property' && !isSpecialTile) {
@@ -1549,19 +1317,16 @@ function handleTileAction(player) {
       const baseRent = calculateRent(tile, state.currentDiceTotal);
       const ultRent = Math.max(baseRent * 2, tile.rent[0] * 2);
       addLog(`👑 PAJAK KEKAISARAN! ${player.name} bayar <b>$${ultRent}</b> ke ${ultOwner.name}!`, 'ultimate');
-      dbg(`Ultimate tax: ${player.name} pays $${ultRent}`);
       attemptPayment(player, ultRent, ultOwner.id, `pajak kekaisaran`);
       return;
     }
   }
 
-  // ===== 2. Normal flow =====
   if (['property', 'railroad', 'utility'].includes(tile.type)) {
     const rawOwner = state.propertyOwners[tile.id];
     const ownerId = rawOwner !== undefined ? Number(rawOwner) : undefined;
     const playerId = Number(player.id);
 
-    // 2a. Belum ada owner → beli
     if (ownerId === undefined) {
       state.landedTileForBuy = tile;
       if (player.isAI) aiDecideBuy(player, tile);
@@ -1569,7 +1334,6 @@ function handleTileAction(player) {
       return;
     }
 
-    // 2b. Milik sendiri → tidak ada trigger
     if (ownerId === playerId) {
       addLog(`${player.name} di properti sendiri: <b>${tile.name}</b>`, 'normal');
       state.phase = 'end-turn';
@@ -1577,13 +1341,8 @@ function handleTileAction(player) {
       return;
     }
 
-    // 2c. Milik orang lain → cek ultimate trigger DULU
-    if (checkUltimateTrigger(player)) {
-      dbg(`Ultimate triggered, aborts normal tile action`, 'ultimate');
-      return;
-    }
+    if (checkUltimateTrigger(player)) return;
 
-    // 2d. Bayar sewa normal
     if (state.mortgaged[tile.id]) {
       addLog(`${tile.name} di-mortgage. Tidak ada sewa.`, 'normal');
       state.phase = 'end-turn';
@@ -1593,7 +1352,6 @@ function handleTileAction(player) {
     const owner = PLAYERS[ownerId];
     const rent = calculateRent(tile, state.currentDiceTotal);
     addLog(`💸 ${player.name} bayar sewa <b>$${rent}</b> ke ${owner.name}`, 'tax');
-    dbg(`Rent: ${player.name} pays $${rent} to ${owner.name}`);
     attemptPayment(player, rent, owner.id, `sewa ${tile.name}`);
   }
   else if (tile.type === 'tax') {
@@ -1652,16 +1410,15 @@ function hasFullColorGroup(playerId, group) {
 /* ============================================================ ULTIMATE ACTIVATION ============================================================ */
 function activateUltimate(ownerId, type = 'rongawi') {
   ownerId = Number(ownerId);
-  if (state.ultimate.active) { dbg('Ultimate already active, skip', 'warn'); return; }
+  if (state.ultimate.active) return;
   const owner = PLAYERS[ownerId];
-  if (!owner) { dbg(`Owner ${ownerId} tidak ditemukan!`, 'error'); return; }
+  if (!owner) return;
 
   const ult = ULTIMATE_TYPES[type];
-  if (!ult) { dbg(`Ultimate type ${type} tidak valid!`, 'error'); return; }
+  if (!ult) return;
 
   addLog(`${ult.icon} <b>${ult.name} oleh ${owner.name}!</b>`, 'ultimate');
   addLog(`${ult.desc} (${ult.duration} ronde)`, 'ultimate');
-  dbg(`ACTIVATE ${type} by ${owner.name}, duration=${ult.duration}, currentRound=${state.roundCount}`, 'ultimate');
 
   state.ultimate.originalOwners = JSON.parse(JSON.stringify(state.propertyOwners));
   state.ultimate.originalHouses = JSON.parse(JSON.stringify(state.propertyHouses));
@@ -1716,7 +1473,6 @@ function applyFury(ownerId) {
     }
   });
   addLog(`🔥 ${count} properti ${owner.name} upgrade +1 rumah!`, 'ultimate');
-  dbg(`Fury: ${count} properties upgraded`, 'ultimate');
 }
 
 function showUltimateOverlay(ult, owner) {
@@ -1743,21 +1499,16 @@ function tickUltimate() {
 
   if (typeof state.ultimate.roundsLeft !== 'number' || isNaN(state.ultimate.roundsLeft)) {
     addLog(`⚠️ Ultimate corrupted, auto-deactivate`, 'ultimate');
-    dbg('Ultimate corrupted!', 'error');
     deactivateUltimate();
     return;
   }
 
-  if (state.ultimate.lastTickRound === state.roundCount) {
-    dbg(`tickUltimate: ronde ${state.roundCount} udah pernah tick, skip`, 'warn');
-    return;
-  }
+  if (state.ultimate.lastTickRound === state.roundCount) return;
   state.ultimate.lastTickRound = state.roundCount;
 
   state.ultimate.roundsLeft--;
   const ult = ULTIMATE_TYPES[state.ultimate.type];
   addLog(`${ult.icon} ${ult.name} — sisa ${state.ultimate.roundsLeft} ronde`, 'ultimate');
-  dbg(`Tick ultimate: roundsLeft=${state.ultimate.roundsLeft}, round=${state.roundCount}`, 'ultimate');
 
   if (state.ultimate.type === 'tax') {
     const owner = PLAYERS[state.ultimate.ownerId];
@@ -1794,7 +1545,6 @@ function tickUltimate() {
 
   if (state.ultimate.roundsLeft <= 0) {
     addLog(`⏰ Ultimate selesai setelah ${ult.duration} ronde.`, 'ultimate');
-    dbg(`Ultimate ${ult.name} ended naturally`, 'ultimate');
     deactivateUltimate();
   } else {
     updatePlayersUI();
@@ -1852,7 +1602,6 @@ function deactivateUltimate() {
   });
 
   updatePlayersUI();
-  dbg('deactivateUltimate done', 'ultimate');
 }
 
 /* ============================================================ DEBT ============================================================ */
@@ -2438,7 +2187,6 @@ function activateCancelUltimate() {
   if (idx === undefined || !player.hand[idx]) return;
   player.hand.splice(idx, 1);
   addLog(`🚫👑 ${player.name} pakai Cancel Ultimate!`, 'ultimate');
-  dbg('Cancel ultimate by player', 'ultimate');
   playSound('card');
   deactivateUltimate();
   updateCardHandUI();
@@ -2483,7 +2231,6 @@ function useTrainTo(tileId) {
 
   playSound('train');
   addLog(`🚂💨 ${player.name} Kereta ke <b>${BOARD_TILES[tileId].name}</b>!`, 'train');
-  dbg(`${player.name} train to ${BOARD_TILES[tileId].name}`);
 
   player.pos = tileId;
   renderTokensOnBoard(player.id);
@@ -2694,13 +2441,10 @@ function handleEndTurn() {
   } while (PLAYERS[state.currentTurnIndex].bankrupt);
 
   const isNewRound = state.currentTurnIndex === 0 && prevTurnIdx !== 0;
-  dbg(`endTurn: prevIdx=${prevTurnIdx} newIdx=${state.currentTurnIndex} isNewRound=${isNewRound}`);
 
   if (isNewRound) {
     state.roundCount++;
-    dbg(`NEW ROUND → ${state.roundCount}`, 'event');
     if (state.ultimate.active) {
-      dbg(`Will tick ultimate (roundsLeft=${state.ultimate.roundsLeft})`, 'ultimate');
       tickUltimate();
     }
   }
@@ -2872,7 +2616,6 @@ function resetGame() {
   updateCardHandUI();
   updateTrainButtonUI();
   addLog('🔄 Game di-reset.', 'system');
-  dbg('Game reset', 'event');
 }
 
 /* ============================================================ KEYBOARD ============================================================ */
