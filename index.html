@@ -411,44 +411,44 @@
     .train-tile:hover { background: rgba(139, 92, 246, 0.3); border-color: #8b5cf6; transform: scale(1.05); box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); }
   }
 
-  /* ===== NEW: Ultimate animation effects ===== */
-  @keyframes ultimateFall {
-    0% {
-      opacity: 0;
-      transform: translateY(0) rotate(0deg) scale(0.5);
-    }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% {
-      opacity: 0;
-      transform: translateY(105vh) rotate(720deg) scale(1.2);
-    }
+  /* ===== BUILD PANEL ===== */
+  .build-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid #334155;
+    border-radius: 10px;
+    transition: all 0.2s ease;
   }
-
-  @keyframes ultimateFlash {
-    0%   { opacity: 0; }
-    30%  { opacity: 1; }
-    100% { opacity: 0; }
+  .build-card:hover {
+    border-color: #60a5fa;
+    background: rgba(30, 41, 59, 0.8);
   }
-
-  @keyframes ultimateShake {
-    0%, 100% { transform: translate(0, 0); }
-    10%      { transform: translate(-6px, 4px); }
-    20%      { transform: translate(6px, -4px); }
-    30%      { transform: translate(-4px, -4px); }
-    40%      { transform: translate(4px, 4px); }
-    50%      { transform: translate(-3px, 2px); }
-    60%      { transform: translate(3px, -2px); }
-    70%      { transform: translate(-2px, 1px); }
-    80%      { transform: translate(2px, -1px); }
-    90%      { transform: translate(-1px, 0); }
+  .build-color-bar {
+    width: 6px;
+    height: 40px;
+    border-radius: 3px;
+    flex-shrink: 0;
   }
-
-  @keyframes crownSpin {
-    0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
-    50%  { transform: scale(1.5) rotate(20deg); opacity: 1; }
-    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  .build-btn {
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
+  .build-btn:active:not(:disabled) { transform: scale(0.94); }
+  .build-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .build-btn-green { background: #10b981; color: white; }
+  .build-btn-red { background: #ef4444; color: white; }
+  .build-btn-amber { background: #f59e0b; color: #0f172a; }
+  .build-btn-blue { background: #3b82f6; color: white; }
 </style>
 </head>
 <body>
@@ -546,6 +546,21 @@
         </div>
         <div id="players-content" class="collapsible-content open">
           <div id="players-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+
+      <!-- ===== NEW: BUILD & SELL PANEL ===== -->
+      <div class="glass-panel p-3 sm:p-4">
+        <div class="collapsible-header flex items-center justify-between mb-2 pb-2 border-b border-slate-800" onclick="toggleCollapse('build-content', this)">
+          <h2 class="text-[11px] sm:text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            🏗️ Beli / Jual Rumah & Hotel
+          </h2>
+          <span class="text-slate-500 text-xs transition-transform chevron">▼</span>
+        </div>
+        <div id="build-content" class="collapsible-content open">
+          <div id="build-panel" class="space-y-2 max-h-64 overflow-y-auto">
+            <span class="text-xs text-slate-500 italic">Belum punya properti untuk dibangun.</span>
+          </div>
         </div>
       </div>
 
@@ -807,6 +822,17 @@ const COLOR_GROUP_INFO = {
   darkblue:  { members: [37, 39],     name: 'Kekaisaran Rongawi' }
 };
 
+const GROUP_COLOR_HEX = {
+  brown:     '#92400e',
+  lightblue: '#38bdf8',
+  pink:      '#ec4899',
+  orange:    '#f97316',
+  red:       '#dc2626',
+  yellow:    '#facc15',
+  green:     '#059669',
+  darkblue:  '#4338ca'
+};
+
 /* ============================================================ PLAYERS ============================================================ */
 const PLAYERS = [
   { id: 0, name: 'Kamu', token: '🚗', color: 'bg-red-500',  border: 'border-red-500',  hex: '#ef4444', money: 1500, pos: 0, inJail: false, jailTurns: 0, getOutCard: 0, bankrupt: false, isAI: false, hand: [] },
@@ -906,6 +932,7 @@ function initBoardUI() {
   setInitialDice();
   updateCardHandUI();
   updateTrainButtonUI();
+  renderBuildPanel();
 }
 
 function setInitialDice() {
@@ -981,6 +1008,7 @@ function updatePlayersUI() {
 
   updateActivePlayerPropertiesUI();
   updateUltimateStatusBadge();
+  renderBuildPanel();
 }
 
 function updateUltimateStatusBadge() {
@@ -1026,6 +1054,246 @@ function updateActivePlayerPropertiesUI() {
   manageBtn.innerText = '⚙️ Kelola Properti';
   manageBtn.onclick = () => openManageModal();
   container.appendChild(manageBtn);
+}
+
+/* ============================================================ NEW: BUILD PANEL ============================================================ */
+function renderBuildPanel() {
+  const player = PLAYERS[0];
+  const container = document.getElementById('build-panel');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Cari semua property milik player yang bisa dibangun
+  const ownedProps = BOARD_TILES.filter(t =>
+    t.type === 'property' &&
+    Number(state.propertyOwners[t.id]) === Number(player.id)
+  );
+
+  if (ownedProps.length === 0) {
+    container.innerHTML = `<span class="text-xs text-slate-500 italic">Belum punya properti untuk dibangun.</span>`;
+    return;
+  }
+
+  // Group by color group
+  const groups = {};
+  ownedProps.forEach(t => {
+    if (!groups[t.group]) groups[t.group] = [];
+    groups[t.group].push(t);
+  });
+
+  // Render per group
+  Object.keys(groups).forEach(groupKey => {
+    const groupTiles = groups[groupKey];
+    const groupInfo = COLOR_GROUP_INFO[groupKey];
+    const isFullGroup = groupInfo && groupInfo.members.every(tid =>
+      Number(state.propertyOwners[tid]) === Number(player.id)
+    );
+
+    // Header group
+    const groupHeader = document.createElement('div');
+    groupHeader.className = 'flex items-center gap-2 px-1 pt-1 pb-1';
+    groupHeader.innerHTML = `
+      <span class="w-3 h-3 rounded-sm" style="background: ${GROUP_COLOR_HEX[groupKey] || '#64748b'}"></span>
+      <span class="text-[10px] font-black uppercase tracking-wide ${isFullGroup ? 'text-emerald-400' : 'text-slate-400'}">
+        ${groupInfo ? groupInfo.name : groupKey}
+        ${isFullGroup ? '✓' : ''}
+      </span>
+    `;
+    container.appendChild(groupHeader);
+
+    // Kalau belum full group → tampilkan hint
+    if (!isFullGroup) {
+      const hint = document.createElement('div');
+      hint.className = 'text-[9px] text-slate-500 italic px-2 pb-1';
+      hint.innerText = 'Belum punya semua properti di group ini.';
+      container.appendChild(hint);
+    }
+
+    // Render tiap tile
+    groupTiles.forEach(tile => {
+      const houses = state.propertyHouses[tile.id] || 0;
+      const isMort = state.mortgaged[tile.id];
+
+      const card = document.createElement('div');
+      card.className = 'build-card';
+
+      // Color bar
+      const colorBar = document.createElement('div');
+      colorBar.className = 'build-color-bar';
+      colorBar.style.background = GROUP_COLOR_HEX[groupKey] || '#64748b';
+
+      // Info
+      const info = document.createElement('div');
+      info.className = 'flex-1 min-w-0';
+      info.innerHTML = `
+        <div class="font-bold text-[11px] text-slate-100 truncate">${tile.name}</div>
+        <div class="flex items-center gap-1 mt-0.5">
+          ${isMort ? '<span class="text-[9px] text-rose-400">🔒 Mortgaged</span>' :
+            houses === 5 ? '<span class="text-[9px] text-amber-400 font-bold">🏨 HOTEL</span>' :
+            houses > 0 ? `<span class="text-[9px] text-emerald-400">${'🏠'.repeat(houses)} ${houses}/4</span>` :
+            '<span class="text-[9px] text-slate-500">Kosong (0/4)</span>'}
+        </div>
+        <div class="text-[9px] text-slate-400 mt-0.5">
+          Sewa: <span class="text-amber-400 font-bold">$${tile.rent[houses] || 0}</span>
+          ${houses < 5 ? `<span class="text-slate-600"> → $${tile.rent[houses+1]}</span>` : ''}
+        </div>
+      `;
+
+      // Buttons
+      const btns = document.createElement('div');
+      btns.className = 'flex gap-1 flex-col';
+
+      const canBuildHouse = isFullGroup && !isMort && houses >= 0 && houses < 4 &&
+        player.money >= tile.houseCost &&
+        isEvenBuildAllowed(tile, groupTiles);
+
+      const canBuildHotel = isFullGroup && !isMort && houses === 4 &&
+        player.money >= tile.houseCost &&
+        groupTiles.every(t => (state.propertyHouses[t.id] || 0) >= 4);
+
+      const canSell = houses > 0 && isSellAllowed(tile, groupTiles);
+
+      // Beli Rumah button
+      if (houses < 4) {
+        const btnHouse = document.createElement('button');
+        btnHouse.className = `build-btn ${canBuildHouse ? 'build-btn-green' : ''}`;
+        btnHouse.innerText = `+🏠 $${tile.houseCost}`;
+        btnHouse.disabled = !canBuildHouse;
+        btnHouse.onclick = () => buildHouseAction(player.id, tile.id);
+        btns.appendChild(btnHouse);
+      }
+
+      // Beli Hotel button (khusus saat 4 rumah + group punya semua 4 rumah)
+      if (houses === 4) {
+        const btnHotel = document.createElement('button');
+        btnHotel.className = `build-btn ${canBuildHotel ? 'build-btn-amber' : ''}`;
+        btnHotel.innerText = `🏨 Hotel $${tile.houseCost}`;
+        btnHotel.disabled = !canBuildHotel;
+        btnHotel.onclick = () => buildHotelAction(player.id, tile.id);
+        btns.appendChild(btnHotel);
+      }
+
+      // Jual button
+      if (houses > 0) {
+        const btnSell = document.createElement('button');
+        btnSell.className = `build-btn ${canSell ? 'build-btn-red' : ''}`;
+        const refund = houses === 5 ? Math.floor(tile.houseCost * 0.5) : Math.floor(tile.houseCost / 2);
+        btnSell.innerText = `-${houses === 5 ? '🏨' : '🏠'} +$${refund}`;
+        btnSell.disabled = !canSell;
+        btnSell.onclick = () => sellHouseAction(player.id, tile.id);
+        btns.appendChild(btnSell);
+      }
+
+      card.appendChild(colorBar);
+      card.appendChild(info);
+      card.appendChild(btns);
+      container.appendChild(card);
+    });
+  });
+}
+
+// Cek even-build: rumah harus dibangun rata. Boleh bangun kalau rumahnya paling sedikit di group.
+function isEvenBuildAllowed(tile, groupTiles) {
+  const myHouses = state.propertyHouses[tile.id] || 0;
+  const minHouses = Math.min(...groupTiles.map(t => state.propertyHouses[t.id] || 0));
+  return myHouses === minHouses;
+}
+
+// Cek jual: cuma boleh jual kalau rumahnya paling banyak di group.
+function isSellAllowed(tile, groupTiles) {
+  const myHouses = state.propertyHouses[tile.id] || 0;
+  const maxHouses = Math.max(...groupTiles.map(t => state.propertyHouses[t.id] || 0));
+  return myHouses === maxHouses;
+}
+
+/* ============================================================ BUILD ACTIONS ============================================================ */
+function buildHouseAction(playerId, tileId) {
+  const player = PLAYERS[playerId];
+  const tile = BOARD_TILES[tileId];
+  if (!tile || tile.type !== 'property') return;
+  if (player.money < tile.houseCost) return;
+
+  const groupTiles = BOARD_TILES.filter(t => t.group === tile.group);
+  const houses = state.propertyHouses[tileId] || 0;
+  if (houses >= 4) return;
+
+  // Even build check
+  if (!isEvenBuildAllowed(tile, groupTiles)) {
+    document.getElementById('action-banner').innerHTML = `❌ Harus bangun rata di semua properti group ini!`;
+    return;
+  }
+
+  // Full group check
+  if (!hasFullColorGroup(playerId, tile.group)) {
+    document.getElementById('action-banner').innerHTML = `❌ Butuh semua properti di group ${tile.group}!`;
+    return;
+  }
+
+  state.propertyHouses[tileId] = houses + 1;
+  player.money -= tile.houseCost;
+  playSound('build');
+  showFloatingMoney(player, `-$${tile.houseCost}`);
+  addLog(`🏠 ${player.name} bangun rumah ${houses + 1}/4 di <b>${tile.name}</b> (-$${tile.houseCost})`, 'buy');
+  updateTileHouses(tileId);
+  updatePlayersUI();
+  checkDebtResolved();
+}
+
+function buildHotelAction(playerId, tileId) {
+  const player = PLAYERS[playerId];
+  const tile = BOARD_TILES[tileId];
+  if (!tile || tile.type !== 'property') return;
+  if (player.money < tile.houseCost) return;
+
+  const groupTiles = BOARD_TILES.filter(t => t.group === tile.group);
+  const houses = state.propertyHouses[tileId] || 0;
+  if (houses !== 4) return;
+
+  // Cek semua member group udah punya 4 rumah
+  if (!groupTiles.every(t => (state.propertyHouses[t.id] || 0) >= 4)) {
+    document.getElementById('action-banner').innerHTML = `❌ Semua properti di group ini harus punya 4 rumah dulu!`;
+    return;
+  }
+
+  if (!hasFullColorGroup(playerId, tile.group)) {
+    document.getElementById('action-banner').innerHTML = `❌ Butuh semua properti di group ${tile.group}!`;
+    return;
+  }
+
+  state.propertyHouses[tileId] = 5;
+  player.money -= tile.houseCost;
+  playSound('build');
+  showFloatingMoney(player, `-$${tile.houseCost}`);
+  addLog(`🏨 ${player.name} bangun <b>HOTEL</b> di <b>${tile.name}</b>! Sewa = $${tile.rent[5]}!`, 'buy');
+  updateTileHouses(tileId);
+  updatePlayersUI();
+  checkDebtResolved();
+}
+
+function sellHouseAction(playerId, tileId) {
+  const player = PLAYERS[playerId];
+  const tile = BOARD_TILES[tileId];
+  if (!tile || tile.type !== 'property') return;
+
+  const groupTiles = BOARD_TILES.filter(t => t.group === tile.group);
+  const houses = state.propertyHouses[tileId] || 0;
+  if (houses === 0) return;
+
+  // Sell check
+  if (!isSellAllowed(tile, groupTiles)) {
+    document.getElementById('action-banner').innerHTML = `❌ Harus jual rata di semua properti group ini!`;
+    return;
+  }
+
+  const refund = houses === 5 ? Math.floor(tile.houseCost * 0.5) : Math.floor(tile.houseCost / 2);
+  state.propertyHouses[tileId] = houses - 1;
+  player.money += refund;
+  playSound('sell');
+  showFloatingMoney(player, `+$${refund}`);
+  addLog(`💸 ${player.name} jual ${houses === 5 ? 'HOTEL' : 'rumah'} di <b>${tile.name}</b> (+$${refund})`, 'buy');
+  updateTileHouses(tileId);
+  updatePlayersUI();
+  checkDebtResolved();
 }
 
 /* ============================================================ CARD HAND ============================================================ */
@@ -1079,7 +1347,7 @@ function addLog(msg, type = 'normal') {
   if (feed.children.length > 50) feed.lastChild.remove();
 }
 
-/* ============================================================ PROPERTY CARD ============================================================ */
+/* ============================================================ PROPERTY CARD RENDER ============================================================ */
 function renderPropertyCard(tile, opts = {}) {
   const { showActions = false, actionContext = 'view', player = null } = opts;
   const rawOwner = state.propertyOwners[tile.id];
@@ -1571,7 +1839,6 @@ function showUltimateOverlay(ult, owner) {
   `;
   document.body.appendChild(overlay);
 
-  // Flash putih
   const flash = document.createElement('div');
   flash.style.cssText = `
     position: fixed; inset: 0; z-index: 10001; pointer-events: none;
@@ -1581,7 +1848,6 @@ function showUltimateOverlay(ult, owner) {
   document.body.appendChild(flash);
   setTimeout(() => flash.remove(), 600);
 
-  // Screen shake
   document.body.style.animation = 'ultimateShake 0.6s ease-out';
   setTimeout(() => { document.body.style.animation = ''; }, 600);
 
@@ -1808,9 +2074,8 @@ function canBuildHouse(player, tile) {
   if (houses >= 4) return false;
   if (!hasFullColorGroup(player.id, tile.group)) return false;
   if (player.money < tile.houseCost) return false;
-  const members = COLOR_GROUP_INFO[tile.group].members;
-  const minHouses = Math.min(...members.map(tid => state.propertyHouses[tid] || 0));
-  return houses === minHouses;
+  const groupTiles = BOARD_TILES.filter(t => t.group === tile.group);
+  return isEvenBuildAllowed(tile, groupTiles);
 }
 
 function canUpgradeToHotel(player, tile) {
@@ -1835,49 +2100,17 @@ function canSellHouseFn(player, tile) {
 }
 
 function doBuildHouse(playerId, tileId) {
-  const player = PLAYERS[playerId];
-  const tile = BOARD_TILES[tileId];
-  if (!canBuildHouse(player, tile)) return;
-  state.propertyHouses[tileId] = (state.propertyHouses[tileId] || 0) + 1;
-  player.money -= tile.houseCost;
-  playSound('build');
-  showFloatingMoney(player, `-$${tile.houseCost}`);
-  addLog(`🏠 ${player.name} bangun rumah ${state.propertyHouses[tileId]}/4 di ${tile.name}`, 'buy');
-  updateTileHouses(tileId);
-  updatePlayersUI();
-  checkDebtResolved();
+  buildHouseAction(playerId, tileId);
   openManageModal();
 }
 
 function doUpgradeHotel(playerId, tileId) {
-  const player = PLAYERS[playerId];
-  const tile = BOARD_TILES[tileId];
-  if (!canUpgradeToHotel(player, tile)) return;
-  state.propertyHouses[tileId] = 5;
-  player.money -= tile.houseCost;
-  playSound('build');
-  showFloatingMoney(player, `-$${tile.houseCost}`);
-  addLog(`🏨 ${player.name} upgrade HOTEL di ${tile.name}! Sewa $${tile.rent[5]}!`, 'buy');
-  updateTileHouses(tileId);
-  updatePlayersUI();
-  checkDebtResolved();
+  buildHotelAction(playerId, tileId);
   openManageModal();
 }
 
 function doSellHouse(playerId, tileId) {
-  const player = PLAYERS[playerId];
-  const tile = BOARD_TILES[tileId];
-  if (!canSellHouseFn(player, tile)) return;
-  const houses = state.propertyHouses[tileId] || 0;
-  const refund = houses === 5 ? Math.floor(tile.houseCost * 0.5) : Math.floor(tile.houseCost / 2);
-  state.propertyHouses[tileId] = houses - 1;
-  player.money += refund;
-  playSound('sell');
-  showFloatingMoney(player, `+$${refund}`);
-  addLog(`💸 ${player.name} jual ${houses === 5 ? 'HOTEL' : 'rumah'} di ${tile.name}`, 'buy');
-  updateTileHouses(tileId);
-  updatePlayersUI();
-  checkDebtResolved();
+  sellHouseAction(playerId, tileId);
   openManageModal();
 }
 
@@ -2075,8 +2308,8 @@ function aiTryBuildHouses() {
   const priority = { orange: 10, red: 9, lightblue: 8, pink: 8, yellow: 7, darkblue: 7, brown: 6, green: 5 };
   buildable.sort((a, b) => (priority[b.group] || 0) - (priority[a.group] || 0));
   const tile = buildable[0];
-  if (canUpgradeToHotel(player, tile)) doUpgradeHotel(player.id, tile.id);
-  else doBuildHouse(player.id, tile.id);
+  if (canUpgradeToHotel(player, tile)) buildHotelAction(player.id, tile.id);
+  else buildHouseAction(player.id, tile.id);
 }
 
 /* ============================================================ BUY ============================================================ */
