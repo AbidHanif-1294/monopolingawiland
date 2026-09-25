@@ -2,38 +2,104 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monopoli Ngawiland</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Monopoly Nusantara — Mobile</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
-  * { -webkit-tap-highlight-color: transparent; }
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
+  html, body {
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     user-select: none;
+    -webkit-user-select: none;
     background: radial-gradient(ellipse at top, #1e293b 0%, #0f172a 50%, #020617 100%);
     color: #f8fafc;
     overflow-x: hidden;
+    min-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* ===== BOARD ===== */
+  /* ================= LAYOUT ================= */
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    padding: 8px;
+    gap: 8px;
+  }
+  @media (min-width: 1024px) {
+    .app-container { padding: 16px; gap: 16px; }
+  }
+
+  .header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 8px 12px;
+    border-radius: 14px;
+    border: 1px solid #1e293b;
+    flex-wrap: wrap;
+  }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    flex: 1;
+  }
+  @media (min-width: 1024px) {
+    .main-layout { grid-template-columns: 1.2fr 1fr; gap: 20px; }
+  }
+  @media (min-width: 1280px) {
+    .main-layout { grid-template-columns: 1.4fr 1fr; }
+  }
+
+  /* ================= BOARD ================= */
+  .board-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
   .monopoly-board {
     display: grid;
     grid-template-columns: 1.5fr repeat(9, 1fr) 1.5fr;
     grid-template-rows: 1.5fr repeat(9, 1fr) 1.5fr;
-    width: 100%; max-width: 820px; aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: min(100vw - 24px, 820px);
+    aspect-ratio: 1 / 1;
     background: linear-gradient(135deg, #1e293b, #0f172a);
-    border: 3px solid #334155;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6),
-                0 0 100px -20px rgba(59, 130, 246, 0.3),
-                inset 0 0 60px rgba(0, 0, 0, 0.4);
+    border: 2px solid #334155;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6),
+                0 0 60px -20px rgba(59, 130, 246, 0.3),
+                inset 0 0 40px rgba(0, 0, 0, 0.4);
     transition: box-shadow 0.6s ease;
+    overflow: hidden;
+    position: relative;
   }
+  @media (min-width: 640px) {
+    .monopoly-board { border: 3px solid #334155; border-radius: 16px; }
+  }
+
   .monopoly-board.ultimate-active {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6),
-                0 0 100px -10px rgba(251, 191, 36, 0.8),
-                0 0 200px -30px rgba(251, 191, 36, 0.5),
-                inset 0 0 80px rgba(251, 191, 36, 0.15);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6),
+                0 0 80px -10px rgba(251, 191, 36, 0.8),
+                inset 0 0 60px rgba(251, 191, 36, 0.15);
     animation: boardUltimate 3s ease-in-out infinite;
   }
   @keyframes boardUltimate {
@@ -41,10 +107,9 @@
     50%      { border-color: #fbbf24; }
   }
   .monopoly-board.storm-active {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6),
-                0 0 100px -10px rgba(59, 130, 246, 0.9),
-                0 0 200px -30px rgba(147, 51, 234, 0.6),
-                inset 0 0 80px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6),
+                0 0 80px -10px rgba(139, 92, 246, 0.9),
+                inset 0 0 60px rgba(139, 92, 246, 0.2);
     animation: boardStorm 2s ease-in-out infinite;
   }
   @keyframes boardStorm {
@@ -52,17 +117,27 @@
     50%      { border-color: #8b5cf6; }
   }
 
-  /* ===== TILES ===== */
-  .tile { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
-  .tile:hover {
-    transform: scale(1.08); z-index: 30;
-    border-color: #60a5fa;
-    box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+  /* ================= TILES ================= */
+  .tile {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
   }
+  .tile:hover { border-color: #60a5fa; z-index: 5; }
+  @media (hover: hover) {
+    .tile:hover {
+      transform: scale(1.08);
+      z-index: 30;
+      box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+    }
+  }
+  .tile:active { transform: scale(0.96); }
+
   .tile-owned { animation: ownerGlow 3s ease-in-out infinite; }
   @keyframes ownerGlow {
-    0%, 100% { box-shadow: inset 0 0 0 2px var(--owner-color), 0 0 8px var(--owner-glow); }
-    50%      { box-shadow: inset 0 0 0 2px var(--owner-color), 0 0 16px var(--owner-glow); }
+    0%, 100% { box-shadow: inset 0 0 0 2px var(--owner-color), 0 0 6px var(--owner-glow); }
+    50%      { box-shadow: inset 0 0 0 2px var(--owner-color), 0 0 12px var(--owner-glow); }
   }
   .tile-landed { animation: landedPulse 0.8s ease-out; }
   @keyframes landedPulse {
@@ -73,15 +148,16 @@
   .tile-mortgaged::before {
     content: '🔒'; position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.6); font-size: 18px; z-index: 15;
-    pointer-events: none;
+    background: rgba(0,0,0,0.6);
+    font-size: clamp(8px, 2vw, 18px);
+    z-index: 15; pointer-events: none;
   }
   .tile-ultimated {
     animation: tileUltimated 2s ease-in-out infinite !important;
   }
   @keyframes tileUltimated {
-    0%, 100% { box-shadow: inset 0 0 0 2px #fbbf24, 0 0 12px #fbbf24; }
-    50%      { box-shadow: inset 0 0 0 3px #fbbf24, 0 0 24px #fbbf24; }
+    0%, 100% { box-shadow: inset 0 0 0 1px #fbbf24, 0 0 8px #fbbf24; }
+    50%      { box-shadow: inset 0 0 0 2px #fbbf24, 0 0 16px #fbbf24; }
   }
   .tile-rongawi::after {
     content: ''; position: absolute; inset: 0;
@@ -94,29 +170,31 @@
     50%      { opacity: 0.9; }
   }
 
-  /* ===== TOKENS ===== */
+  /* ================= TOKENS ================= */
   .token-pawn {
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-    display: inline-block; will-change: transform;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+    display: inline-block;
+    will-change: transform;
   }
   .token-active { animation: tokenBounce 0.6s ease-in-out infinite alternate; }
   @keyframes tokenBounce {
     from { transform: translateY(0) scale(1); }
-    to   { transform: translateY(-8px) scale(1.15); }
+    to   { transform: translateY(-4px) scale(1.12); }
   }
   @keyframes tokenHop {
     0%   { transform: translateY(0) scale(1); }
-    40%  { transform: translateY(-14px) scale(1.15); }
-    70%  { transform: translateY(-4px) scale(1.05); }
+    40%  { transform: translateY(-10px) scale(1.15); }
+    70%  { transform: translateY(-3px) scale(1.05); }
     100% { transform: translateY(0) scale(1); }
   }
   .token-hopping { animation: tokenHop 0.28s ease-out; }
 
-  /* ===== DICE ===== */
-  .dice-container { perspective: 800px; width: 56px; height: 56px; }
+  /* ================= DICE ================= */
+  .dice-container { perspective: 800px; width: clamp(38px, 10vw, 56px); height: clamp(38px, 10vw, 56px); }
   .dice-3d {
-    width: 56px; height: 56px; position: relative;
+    width: 100%; height: 100%;
+    position: relative;
     transform-style: preserve-3d;
     transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
@@ -131,54 +209,71 @@
   .dice-face {
     position: absolute; inset: 0;
     background: linear-gradient(145deg, #ffffff, #cbd5e1);
-    border: 2px solid #94a3b8; border-radius: 12px;
+    border: 1.5px solid #94a3b8; border-radius: clamp(6px, 1.5vw, 12px);
     display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr);
-    padding: 6px;
+    padding: clamp(3px, 0.8vw, 6px);
     box-shadow: inset 0 2px 4px rgba(255,255,255,0.9),
                 inset 0 -2px 4px rgba(0,0,0,0.15),
-                0 4px 12px rgba(0,0,0,0.4);
+                0 3px 8px rgba(0,0,0,0.4);
   }
   .pip {
     background: radial-gradient(circle at 30% 30%, #334155, #0f172a);
-    border-radius: 50%; width: 8px; height: 8px; margin: auto;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: clamp(4px, 1vw, 8px);
+    height: clamp(4px, 1vw, 8px);
+    margin: auto;
   }
   .dice-result-pulse { animation: diceResult 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
   @keyframes diceResult {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.25); }
-    100% { transform: scale(1); }
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.25); }
   }
 
-  /* ===== PANELS ===== */
+  /* ================= PANELS ================= */
   .glass-panel {
     background: rgba(30, 41, 59, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
   }
 
-  /* ===== BUTTONS ===== */
-  .glow-pulse { animation: pulseGlow 2s infinite; }
-  @keyframes pulseGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 8px 24px rgba(0,0,0,0.4); }
-    50%      { box-shadow: 0 0 35px rgba(59, 130, 246, 0.9), 0 8px 24px rgba(0,0,0,0.4); }
+  /* ================= COLLAPSIBLE ================= */
+  .collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+    opacity: 0;
   }
+  .collapsible-content.open {
+    max-height: 2000px;
+    opacity: 1;
+  }
+  .collapsible-header {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .collapsible-header:hover { background: rgba(51, 65, 85, 0.3); }
+
+  /* ================= BUTTONS ================= */
   .btn-press { transition: transform 0.15s ease; }
   .btn-press:active:not(:disabled) { transform: scale(0.94); }
 
-  /* ===== FLOAT ===== */
+  /* ================= FLOAT ================= */
   .money-float {
     position: absolute; top: 20%; left: 50%;
     transform: translateX(-50%);
     animation: floatUp 1.4s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
     pointer-events: none; font-weight: 900; z-index: 100;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.8); font-size: 14px; white-space: nowrap;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    font-size: clamp(10px, 2.5vw, 14px);
+    white-space: nowrap;
   }
   @keyframes floatUp {
     0%   { opacity: 0; transform: translate(-50%, 10px) scale(0.7); }
     20%  { opacity: 1; transform: translate(-50%, -10px) scale(1.15); }
-    100% { opacity: 0; transform: translate(-50%, -70px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -60px) scale(1); }
   }
 
   .log-entry { animation: logSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -187,6 +282,7 @@
     to   { opacity: 1; transform: translateX(0); }
   }
 
+  /* ================= MODAL ================= */
   .modal-anim { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .modal-card-flip {
     animation: cardFlip 0.7s cubic-bezier(0.4, 0, 0.2, 1);
@@ -198,18 +294,49 @@
     100% { transform: rotateY(0deg) scale(1); opacity: 1; }
   }
 
+  /* Mobile modal = full screen */
+  .modal-box {
+    width: 100%;
+    max-width: 90vw;
+    max-height: 85dvh;
+    overflow-y: auto;
+    border-radius: 20px;
+  }
+  @media (min-width: 640px) {
+    .modal-box { max-width: 500px; }
+  }
+  @media (max-width: 640px) {
+    .modal-box {
+      max-width: 100vw;
+      max-height: 100dvh;
+      border-radius: 0;
+      margin: 0;
+    }
+    .modal-box::before {
+      content: '';
+      display: block;
+      width: 40px; height: 4px;
+      background: #334155;
+      border-radius: 2px;
+      margin: 8px auto 4px;
+    }
+  }
+
+  /* ================= HOUSE ================= */
   .house-icon {
-    display: inline-block; animation: housePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    font-size: 8px; line-height: 1;
+    display: inline-block;
+    animation: housePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    line-height: 1;
   }
   @keyframes housePop {
     from { transform: scale(0) rotate(-180deg); }
     to   { transform: scale(1) rotate(0deg); }
   }
   .hotel-icon {
-    display: inline-block; animation: hotelPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    font-size: 10px; line-height: 1;
-    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.9));
+    display: inline-block;
+    animation: hotelPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    line-height: 1;
+    filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.9));
   }
   @keyframes hotelPop {
     0%   { transform: scale(0) rotate(-180deg); }
@@ -217,22 +344,24 @@
     100% { transform: scale(1) rotate(0deg); }
   }
 
-  .ai-thinking { display: inline-flex; gap: 3px; align-items: center; margin-left: 6px; }
+  .ai-thinking { display: inline-flex; gap: 2px; align-items: center; margin-left: 4px; }
   .ai-thinking span {
-    width: 5px; height: 5px; border-radius: 50%; background: #60a5fa;
+    width: 4px; height: 4px; border-radius: 50%; background: #60a5fa;
     animation: thinkDot 1.2s infinite ease-in-out;
   }
   .ai-thinking span:nth-child(2) { animation-delay: 0.15s; }
   .ai-thinking span:nth-child(3) { animation-delay: 0.3s; }
   @keyframes thinkDot {
     0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30%           { transform: translateY(-6px); opacity: 1; }
+    30%           { transform: translateY(-4px); opacity: 1; }
   }
 
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0f172a; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #334155, #1e293b); border-radius: 3px; }
+  /* ================= SCROLLBAR ================= */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
 
+  /* ================= RIPPLE ================= */
   .ripple {
     position: absolute; border-radius: 50%;
     background: rgba(255,255,255,0.5);
@@ -242,19 +371,21 @@
   }
   @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
 
-  /* ===== PROPERTY CARD ===== */
+  /* ================= PROPERTY CARD ================= */
   .property-card {
-    position: relative; width: 100%; max-width: 320px;
+    position: relative;
+    width: 100%;
+    max-width: 340px;
     background: linear-gradient(180deg, #fefce8 0%, #fef9c3 100%);
-    border-radius: 12px; padding: 0;
+    border-radius: 12px;
+    padding: 0;
     box-shadow: 0 20px 40px -12px rgba(0,0,0,0.6),
                 0 0 0 1px rgba(0,0,0,0.1),
                 inset 0 1px 0 rgba(255,255,255,0.9);
     overflow: hidden;
-    font-family: 'Plus Jakarta Sans', sans-serif;
     color: #0f172a;
-    transform-origin: center;
     animation: cardDeal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    margin: 0 auto;
   }
   @keyframes cardDeal {
     0%   { transform: translateY(-30px) rotate(-8deg) scale(0.7); opacity: 0; }
@@ -279,12 +410,13 @@
     text-align: center; border-bottom: 2px solid #0f172a;
   }
   .property-card-title {
-    font-size: 12px; font-weight: 900; text-transform: uppercase;
+    font-size: clamp(11px, 3.5vw, 13px);
+    font-weight: 900; text-transform: uppercase;
     letter-spacing: 1.5px; line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   }
   .property-card-subtitle {
-    font-size: 8px; font-weight: 700; letter-spacing: 2px;
+    font-size: clamp(7px, 2vw, 9px);
+    font-weight: 700; letter-spacing: 2px;
     opacity: 0.7; margin-top: 2px;
   }
   .property-card-photo {
@@ -295,7 +427,8 @@
     overflow: hidden; display: flex; align-items: center; justify-content: center;
   }
   .property-card-photo .icon {
-    font-size: 44px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+    font-size: clamp(32px, 10vw, 48px);
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
     z-index: 1; animation: photoFloat 3s ease-in-out infinite;
   }
   @keyframes photoFloat {
@@ -304,22 +437,17 @@
   }
   .property-card-photo .bg-label {
     position: absolute; bottom: 6px; left: 8px;
-    font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.85);
+    font-size: clamp(7px, 2vw, 9px);
+    font-weight: 800; color: rgba(255,255,255,0.85);
     letter-spacing: 1px; text-transform: uppercase;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
   }
   .property-card-status {
     position: absolute; top: 8px; right: 8px;
     padding: 3px 8px; border-radius: 6px;
-    font-size: 9px; font-weight: 900; letter-spacing: 1px;
+    font-size: clamp(8px, 2.2vw, 10px);
+    font-weight: 900; letter-spacing: 1px;
     text-transform: uppercase; z-index: 10;
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    animation: statusPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  @keyframes statusPop {
-    0%   { transform: scale(0) rotate(-30deg); }
-    60%  { transform: scale(1.2) rotate(10deg); }
-    100% { transform: scale(1) rotate(0deg); }
   }
   .status-owned      { background: #10b981; color: white; }
   .status-available  { background: #3b82f6; color: white; }
@@ -332,18 +460,24 @@
     border-bottom: 2px dashed #0f172a; padding-bottom: 6px; margin-bottom: 8px;
   }
   .property-card-price-label {
-    font-size: 8px; font-weight: 800; letter-spacing: 1.5px;
+    font-size: clamp(7px, 2vw, 9px);
+    font-weight: 800; letter-spacing: 1.5px;
     text-transform: uppercase; color: #475569;
   }
-  .property-card-price { font-size: 20px; font-weight: 900; color: #0f172a; }
+  .property-card-price {
+    font-size: clamp(16px, 5vw, 22px);
+    font-weight: 900; color: #0f172a;
+  }
   .property-card-section-title {
-    font-size: 8px; font-weight: 900; letter-spacing: 1.5px;
+    font-size: clamp(7px, 2vw, 9px);
+    font-weight: 900; letter-spacing: 1.5px;
     text-transform: uppercase; color: #0f172a;
     margin-bottom: 4px; padding-bottom: 2px; border-bottom: 1px solid #0f172a;
   }
   .property-card-rent-row {
     display: flex; justify-content: space-between;
-    font-size: 10px; font-weight: 600; color: #334155;
+    font-size: clamp(9px, 2.5vw, 11px);
+    font-weight: 600; color: #334155;
     padding: 2px 0; border-bottom: 1px dotted #cbd5e1;
   }
   .property-card-rent-row:last-child { border-bottom: none; }
@@ -354,24 +488,42 @@
   }
   .property-card-rent-row.highlight .val { color: #b45309; }
   .property-card-desc {
-    font-size: 9px; font-style: italic; color: #475569;
+    font-size: clamp(8px, 2.2vw, 10px);
+    font-style: italic; color: #475569;
     text-align: center; margin-top: 8px; padding-top: 6px;
     border-top: 1px dashed #94a3b8; line-height: 1.4;
   }
   .property-card-actions {
-    display: flex; gap: 6px; padding: 0 12px 12px; background: #fffbeb;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px; padding: 0 12px 12px;
+    background: #fffbeb;
+  }
+  @media (min-width: 640px) {
+    .property-card-actions { display: flex; flex-wrap: wrap; }
+    .property-card-actions button { flex: 1; min-width: 70px; }
   }
   .property-card-actions button {
-    flex: 1; min-width: 70px;
-    padding: 8px 6px; border-radius: 6px;
-    font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
-    border: 2px solid #0f172a; background: #fef3c7;
-    color: #0f172a; cursor: pointer;
-    transition: all 0.2s ease; text-transform: uppercase;
+    padding: 10px 8px;
+    border-radius: 8px;
+    font-size: clamp(9px, 2.5vw, 11px);
+    font-weight: 800; letter-spacing: 0.5px;
+    border: 2px solid #0f172a;
+    background: #fef3c7; color: #0f172a;
+    cursor: pointer; transition: all 0.2s ease;
+    text-transform: uppercase;
+    min-height: 40px;
+    -webkit-tap-highlight-color: transparent;
   }
-  .property-card-actions button:hover:not(:disabled) {
-    transform: translateY(-2px); box-shadow: 0 4px 0 #0f172a;
+  @media (hover: hover) {
+    .property-card-actions button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 0 #0f172a;
+    }
+  }
+  .property-card-actions button:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: none;
   }
   .property-card-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
   .property-card-actions .btn-buy    { background: #10b981; color: white; }
@@ -383,40 +535,38 @@
   .property-card-actions .btn-land   { background: #7c3aed; color: white; }
   .property-card-actions .btn-unmort { background: #0891b2; color: white; }
 
-  /* ===== ULTIMATE OVERLAY ===== */
+  /* ================= ULTIMATE OVERLAY ================= */
   .ultimate-overlay {
     position: fixed; inset: 0; z-index: 9999;
     display: flex; align-items: center; justify-content: center;
     background: radial-gradient(circle, rgba(251,191,36,0.4), rgba(15,23,42,0.95));
     animation: ultimateFadeIn 0.5s ease;
     pointer-events: none;
+    padding: 16px;
   }
   @keyframes ultimateFadeIn { from { opacity: 0; } to { opacity: 1; } }
   .ultimate-overlay.fade-out { animation: ultimateFadeOut 0.8s ease forwards; }
   @keyframes ultimateFadeOut { from { opacity: 1; } to { opacity: 0; } }
   .ultimate-text {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
     text-align: center;
     animation: ultimateText 2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    padding: 20px;
     max-width: 90vw;
   }
   @keyframes ultimateText {
-    0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.5); }
-    40%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    0%   { opacity: 0; transform: scale(0.5); }
+    40%  { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
   }
   .ultimate-title {
-    font-size: 48px;
+    font-size: clamp(28px, 10vw, 56px);
     font-weight: 900;
     background: linear-gradient(90deg, #fbbf24, #fef3c7, #fbbf24);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    letter-spacing: 4px;
-    text-shadow: 0 0 30px rgba(251,191,36,0.8);
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(251,191,36,0.8);
     animation: goldShimmer 2s linear infinite;
   }
   @keyframes goldShimmer {
@@ -424,37 +574,50 @@
     100% { background-position: 200% 50%; }
   }
   .ultimate-sub {
-    font-size: 14px; color: #fef3c7;
-    letter-spacing: 3px; margin-top: 8px; opacity: 0.9;
+    font-size: clamp(10px, 3vw, 14px);
+    color: #fef3c7;
+    letter-spacing: 2px; margin-top: 6px; opacity: 0.9;
   }
 
   .ultimate-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 6px; border-radius: 999px;
     background: linear-gradient(90deg, #fbbf24, #f59e0b);
-    color: #0f172a; font-size: 9px; font-weight: 900;
+    color: #0f172a;
+    font-size: clamp(8px, 2vw, 10px);
+    font-weight: 900;
     animation: ultimateBadgePulse 1.5s ease-in-out infinite;
   }
   @keyframes ultimateBadgePulse {
-    0%, 100% { box-shadow: 0 0 8px rgba(251,191,36,0.6); }
-    50%      { box-shadow: 0 0 20px rgba(251,191,36,1); }
+    0%, 100% { box-shadow: 0 0 6px rgba(251,191,36,0.6); }
+    50%      { box-shadow: 0 0 14px rgba(251,191,36,1); }
   }
 
-  /* ===== CARD HAND ===== */
+  /* ================= CARD HAND ================= */
   .card-hand { display: flex; flex-wrap: wrap; gap: 6px; min-height: 50px; }
   .mini-card {
     position: relative;
-    width: 44px; height: 60px; border-radius: 6px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 22px; cursor: pointer;
+    width: clamp(38px, 10vw, 48px);
+    height: clamp(52px, 14vw, 64px);
+    border-radius: 8px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: clamp(18px, 5vw, 24px);
+    cursor: pointer;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
     border: 2px solid rgba(255,255,255,0.2);
+    -webkit-tap-highlight-color: transparent;
   }
-  .mini-card:hover {
-    transform: translateY(-8px) scale(1.1) rotate(-3deg);
-    box-shadow: 0 12px 20px rgba(0,0,0,0.6), 0 0 20px rgba(251,191,36,0.6);
-    z-index: 10;
+  .mini-card:active {
+    transform: scale(0.92);
+  }
+  @media (hover: hover) {
+    .mini-card:hover {
+      transform: translateY(-6px) scale(1.08) rotate(-3deg);
+      box-shadow: 0 10px 16px rgba(0,0,0,0.6), 0 0 16px rgba(251,191,36,0.6);
+      z-index: 10;
+    }
   }
   .mini-card-jail { background: linear-gradient(135deg, #3b82f6, #1e40af); }
   .mini-card-cancel { background: linear-gradient(135deg, #fbbf24, #b45309); }
@@ -462,227 +625,286 @@
   .mini-card-train { background: linear-gradient(135deg, #8b5cf6, #5b21b6); }
   .mini-card-ulti { background: linear-gradient(135deg, #fbbf24, #dc2626); }
 
-  /* ===== TRAIN MODAL ===== */
+  /* ================= TRAIN MODAL ================= */
   .train-tile {
-    padding: 8px; border-radius: 8px;
+    padding: clamp(6px, 2vw, 10px);
+    border-radius: 8px;
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid #334155;
-    font-size: 10px; font-weight: 700; color: #e2e8f0;
-    cursor: pointer; transition: all 0.2s ease; text-align: center;
+    font-size: clamp(9px, 2.5vw, 11px);
+    font-weight: 700; color: #e2e8f0;
+    cursor: pointer; transition: all 0.2s ease;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
   }
-  .train-tile:hover {
-    background: rgba(139, 92, 246, 0.3);
-    border-color: #8b5cf6;
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+  .train-tile:active {
+    transform: scale(0.95);
+    background: rgba(139, 92, 246, 0.5);
+  }
+  @media (hover: hover) {
+    .train-tile:hover {
+      background: rgba(139, 92, 246, 0.3);
+      border-color: #8b5cf6;
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+    }
   }
 
-  /* ===== LIGHTNING EFFECT ===== */
-  @keyframes lightningFlash {
-    0%, 100% { opacity: 0; }
-    50%      { opacity: 1; }
+  /* ================= ULTIMATE BADGE IN HEADER ================= */
+  @media (max-width: 480px) {
+    .hide-xs { display: none; }
   }
-  .lightning-flash {
-    position: fixed; inset: 0;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.8), transparent 70%);
-    pointer-events: none; z-index: 9998;
-    animation: lightningFlash 0.3s ease 2;
+
+  /* ================= CENTER PANEL SCROLL ================= */
+  .center-content {
+    overflow-y: auto;
+    padding: clamp(8px, 2vw, 16px);
+  }
+  .center-content::-webkit-scrollbar { width: 3px; }
+
+  /* ================= SAFE AREA ================= */
+  @supports (padding: max(0px)) {
+    .app-container {
+      padding-top: max(8px, env(safe-area-inset-top));
+      padding-left: max(8px, env(safe-area-inset-left));
+      padding-right: max(8px, env(safe-area-inset-right));
+    }
+  }
+
+  /* Prevent iOS zoom on input focus (we don't have inputs, but safe) */
+  @media (max-width: 767px) {
+    input, select, textarea { font-size: 16px !important; }
+  }
+
+  /* ================= REDUCED MOTION ================= */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>
 </head>
-<body class="min-h-screen p-3 md:p-6 flex flex-col justify-between">
+<body>
 
-<!-- HEADER -->
-<header class="max-w-7xl mx-auto w-full flex flex-wrap items-center justify-between gap-4 mb-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-lg backdrop-blur">
-  <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-blue-500/30">M</div>
-    <div>
-      <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-        MONOPOLI NGAWILAND
-      </h1>
-      <p class="text-xs text-slate-400">Berpetualanglah mencari jejak reruntuhan Kekaisaran Rongawi melalui kota-kota yang ada di stiker JMK.</p>
+<div class="app-container">
+
+  <!-- HEADER -->
+  <header class="header-bar">
+    <div class="flex items-center gap-2 min-w-0 flex-1">
+      <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-sm sm:text-xl text-white shadow-lg shadow-blue-500/30 shrink-0">M</div>
+      <div class="min-w-0">
+        <h1 class="text-sm sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent truncate">
+          MONOPOLY NUSANTARA
+        </h1>
+        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Mobile Edition • vs AI</p>
+      </div>
     </div>
-  </div>
 
-  <div class="flex items-center gap-3 bg-slate-950/60 px-4 py-2 rounded-xl border border-slate-800 flex-wrap">
-    <div class="text-xs text-slate-400">Giliran:</div>
-    <div id="current-turn-badge" class="flex items-center gap-2 font-bold text-sm text-amber-400"></div>
-    <div class="h-4 w-px bg-slate-800 mx-1"></div>
-    <div class="text-xs text-slate-400">Ronde: <span id="round-counter" class="font-bold text-slate-200">1</span></div>
-    <div id="ultimate-status-badge" class="hidden ultimate-badge">👑 0</div>
-  </div>
+    <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-950/60 px-2 sm:px-3 py-1.5 rounded-lg border border-slate-800">
+      <div id="current-turn-badge" class="flex items-center gap-1.5 font-bold text-[11px] sm:text-sm text-amber-400"></div>
+      <div class="h-3 w-px bg-slate-800"></div>
+      <div class="text-[10px] sm:text-xs text-slate-400">R<span id="round-counter" class="font-bold text-slate-200 ml-0.5">1</span></div>
+      <div id="ultimate-status-badge" class="hidden ultimate-badge">👑 0</div>
+    </div>
 
-  <div class="flex items-center gap-2">
-    <button id="btn-sound" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition btn-press">
-      <svg id="icon-sound" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.586 6.414a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/></svg>
-    </button>
-    <button onclick="resetGame()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-rose-900/40 hover:text-rose-300 border border-slate-700 text-slate-300 transition btn-press">
-      Reset
-    </button>
-  </div>
-</header>
+    <div class="flex items-center gap-1.5">
+      <button id="btn-sound" onclick="toggleSound()" class="p-2 rounded-lg bg-slate-800 active:bg-slate-700 border border-slate-700 text-slate-300 transition" aria-label="Sound">
+        <svg id="icon-sound" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.586 6.414a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/></svg>
+      </button>
+      <button onclick="resetGame()" class="px-2.5 py-2 text-[10px] sm:text-xs font-bold rounded-lg bg-slate-800 active:bg-rose-900/40 border border-slate-700 text-slate-300 transition">
+        Reset
+      </button>
+    </div>
+  </header>
 
-<main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start flex-1">
+  <!-- MAIN -->
+  <div class="main-layout">
 
-  <!-- BOARD -->
-  <section class="lg:col-span-7 flex flex-col items-center justify-center">
-    <div class="relative w-full flex justify-center">
-      <div id="board-grid" class="monopoly-board rounded-2xl overflow-hidden relative">
-        <div class="bg-slate-900/95 flex flex-col justify-between p-4 md:p-6 border border-slate-800/80 rounded-xl m-1 relative overflow-hidden shadow-inner" style="grid-column: 2 / 11; grid-row: 2 / 11;">
-          <div class="text-center mt-2 relative z-10">
-            <div class="inline-block bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white text-xl md:text-2xl font-black px-6 py-1.5 rounded-lg shadow-lg tracking-wider border border-red-400/30 uppercase transform -rotate-3">
-              MONOPOLY
+    <!-- BOARD SECTION -->
+    <section class="board-wrapper">
+      <div class="relative w-full flex justify-center">
+        <div id="board-grid" class="monopoly-board">
+          <!-- CENTER -->
+          <div class="bg-slate-900/95 flex flex-col justify-between border border-slate-800/80 rounded-lg m-1 relative overflow-hidden shadow-inner center-content" style="grid-column: 2 / 11; grid-row: 2 / 11;">
+            <div class="text-center">
+              <div class="inline-block bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white text-xs sm:text-xl font-black px-3 sm:px-6 py-0.5 sm:py-1.5 rounded-md shadow-lg tracking-wider border border-red-400/30 uppercase transform -rotate-3">
+                MONOPOLY
+              </div>
+              <p class="text-[8px] sm:text-xs text-slate-400 mt-1 font-medium tracking-wide hidden sm:block">NUSANTARA EDITION</p>
             </div>
-            <p class="text-[10px] md:text-xs text-slate-400 mt-2 font-medium tracking-wide">Ngawiland</p>
-          </div>
 
-          <div class="flex flex-col items-center justify-center gap-4 my-auto relative z-10">
-            <div class="flex items-center justify-center gap-4 bg-slate-950/70 p-4 rounded-2xl border border-slate-800 shadow-xl">
-              <div class="dice-container"><div id="dice-1" class="dice-3d"></div></div>
-              <div class="dice-container"><div id="dice-2" class="dice-3d"></div></div>
-              <div class="flex flex-col items-center justify-center ml-2 border-l border-slate-800 pl-3">
-                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total</span>
-                <span id="dice-total-text" class="text-2xl font-extrabold text-amber-400 transition-all">—</span>
+            <div class="flex flex-col items-center justify-center gap-2 sm:gap-4 my-auto">
+              <div class="flex items-center justify-center gap-2 sm:gap-4 bg-slate-950/70 p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800 shadow-xl">
+                <div class="dice-container"><div id="dice-1" class="dice-3d"></div></div>
+                <div class="dice-container"><div id="dice-2" class="dice-3d"></div></div>
+                <div class="flex flex-col items-center justify-center ml-1 sm:ml-2 border-l border-slate-800 pl-2 sm:pl-3">
+                  <span class="text-[7px] sm:text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total</span>
+                  <span id="dice-total-text" class="text-sm sm:text-2xl font-extrabold text-amber-400 transition-all">—</span>
+                </div>
+              </div>
+
+              <div class="w-full max-w-sm space-y-1.5 sm:space-y-3">
+                <button id="btn-roll-dice" onclick="handleRollDice()" class="w-full py-2.5 sm:py-3.5 px-4 rounded-lg sm:rounded-xl font-extrabold text-white text-xs sm:text-base bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 shadow-lg shadow-blue-600/40 border border-blue-400/30 transition-all flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                  <span id="roll-btn-label">Kocok Dadu</span>
+                </button>
+                <button id="btn-train" onclick="openTrainModal()" class="w-full py-2 sm:py-2.5 px-3 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-sm bg-gradient-to-r from-purple-600 to-violet-700 text-white border border-purple-400/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                  🚂 Kereta <span id="train-count" class="text-[9px] sm:text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+                <button id="btn-end-turn" onclick="handleEndTurn()" disabled class="w-full py-2 sm:py-2.5 px-3 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-sm bg-slate-800 text-slate-300 border border-slate-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                  Selesai →
+                </button>
+              </div>
+
+              <div id="action-banner" class="text-[10px] sm:text-xs text-center text-slate-300 bg-slate-800/80 px-2 sm:px-4 py-1.5 rounded-lg border border-slate-700/60 max-w-md w-full">
+                Selamat datang! Klik Kocok Dadu.
               </div>
             </div>
 
-            <div class="flex flex-wrap items-center justify-center gap-3 w-full max-w-sm">
-              <button id="btn-roll-dice" onclick="handleRollDice()" class="w-full py-3.5 px-6 rounded-xl font-extrabold text-white text-base bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-600/40 glow-pulse border border-blue-400/30 transition-all flex items-center justify-center gap-2 btn-press">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                <span id="roll-btn-label">Kocok Dadu (Space)</span>
-              </button>
-              <button id="btn-train" onclick="openTrainModal()" class="w-full py-2.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-violet-700 hover:from-purple-500 hover:to-violet-600 text-white border border-purple-400/30 transition btn-press flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-                🚂 Kereta Tembus <span id="train-count" class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">0</span>
-              </button>
-              <button id="btn-end-turn" onclick="handleEndTurn()" disabled class="w-full py-2.5 px-4 rounded-xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition disabled:opacity-40 disabled:cursor-not-allowed btn-press">
-                Selesai Giliran →
-              </button>
-            </div>
-
-            <div id="action-banner" class="text-xs text-center text-slate-300 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700/60 max-w-md w-full truncate">
-              Selamat datang! Klik <span class="text-blue-400 font-bold">Kocok Dadu</span> untuk mulai.
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3 mt-2 z-10">
-            <div class="bg-amber-950/30 border border-amber-800/40 rounded-xl p-2 flex items-center gap-2">
-              <div class="w-7 h-9 rounded bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center font-bold text-slate-900 text-xs shadow">?</div>
-              <div>
-                <div class="text-[11px] font-bold text-amber-300">Kesempatan</div>
-                <div class="text-[9px] text-slate-400">Kartu Keberuntungan</div>
+            <div class="hidden sm:grid grid-cols-2 gap-2">
+              <div class="bg-amber-950/30 border border-amber-800/40 rounded-lg p-1.5 flex items-center gap-2">
+                <div class="w-6 h-7 rounded bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center font-bold text-slate-900 text-[10px]">?</div>
+                <div>
+                  <div class="text-[10px] font-bold text-amber-300">Kesempatan</div>
+                </div>
               </div>
-            </div>
-            <div class="bg-blue-950/30 border border-blue-800/40 rounded-xl p-2 flex items-center gap-2">
-              <div class="w-7 h-9 rounded bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center font-bold text-white text-xs shadow">📦</div>
-              <div>
-                <div class="text-[11px] font-bold text-blue-300">Dana Umum</div>
-                <div class="text-[9px] text-slate-400">Hadiah & Pajak</div>
+              <div class="bg-blue-950/30 border border-blue-800/40 rounded-lg p-1.5 flex items-center gap-2">
+                <div class="w-6 h-7 rounded bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center font-bold text-white text-[10px]">📦</div>
+                <div>
+                  <div class="text-[10px] font-bold text-blue-300">Dana Umum</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- SIDEBAR -->
-  <section class="lg:col-span-5 flex flex-col gap-4">
-    <div class="glass-panel p-4 rounded-2xl border border-slate-800 shadow-xl">
-      <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-        <span>Pemain</span>
-        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">Start $1500</span>
-      </h2>
-      <div id="players-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-    </div>
+    <!-- SIDEBAR -->
+    <section class="flex flex-col gap-3">
 
-    <div class="glass-panel p-4 rounded-2xl border border-slate-800 shadow-xl">
-      <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
-        <span>🎴 Kartu di Tangan</span>
-        <span class="text-[10px] text-slate-500">Klik untuk pakai</span>
-      </h2>
-      <div id="card-hand-container" class="card-hand">
-        <span class="text-xs text-slate-500 italic">Belum ada kartu tersimpan.</span>
+      <!-- PLAYERS -->
+      <div class="glass-panel p-3 sm:p-4">
+        <div class="collapsible-header flex items-center justify-between mb-2 pb-2 border-b border-slate-800" onclick="toggleCollapse('players-content', this)">
+          <h2 class="text-[11px] sm:text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            👥 Pemain
+          </h2>
+          <span class="text-slate-500 text-xs transition-transform chevron">▼</span>
+        </div>
+        <div id="players-content" class="collapsible-content open">
+          <div id="players-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
       </div>
-    </div>
 
-    <div class="glass-panel p-4 rounded-2xl border border-slate-800 shadow-xl flex flex-col h-[220px]">
-      <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
-        <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-400">Riwayat</h2>
-        <span class="text-[10px] text-slate-500">Live</span>
+      <!-- CARD HAND -->
+      <div class="glass-panel p-3 sm:p-4">
+        <div class="collapsible-header flex items-center justify-between mb-2 pb-2 border-b border-slate-800" onclick="toggleCollapse('hand-content', this)">
+          <h2 class="text-[11px] sm:text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            🎴 Kartu Tangan
+          </h2>
+          <span class="text-slate-500 text-xs transition-transform chevron">▼</span>
+        </div>
+        <div id="hand-content" class="collapsible-content open">
+          <div id="card-hand-container" class="card-hand">
+            <span class="text-xs text-slate-500 italic">Belum ada kartu tersimpan.</span>
+          </div>
+        </div>
       </div>
-      <div id="game-log-feed" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs"></div>
-    </div>
 
-    <div class="glass-panel p-4 rounded-2xl border border-slate-800 shadow-xl">
-      <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-2">Properti Kamu</h2>
-      <div id="active-player-properties" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
-        <span class="text-xs text-slate-500 italic">Belum memiliki properti.</span>
+      <!-- LOG -->
+      <div class="glass-panel p-3 sm:p-4">
+        <div class="collapsible-header flex items-center justify-between mb-2 pb-2 border-b border-slate-800" onclick="toggleCollapse('log-content', this)">
+          <h2 class="text-[11px] sm:text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            📜 Riwayat
+          </h2>
+          <span class="text-slate-500 text-xs transition-transform chevron">▼</span>
+        </div>
+        <div id="log-content" class="collapsible-content open">
+          <div id="game-log-feed" class="h-40 sm:h-56 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
+        </div>
       </div>
-    </div>
-  </section>
-</main>
+
+      <!-- PROPERTIES -->
+      <div class="glass-panel p-3 sm:p-4">
+        <div class="collapsible-header flex items-center justify-between mb-2 pb-2 border-b border-slate-800" onclick="toggleCollapse('props-content', this)">
+          <h2 class="text-[11px] sm:text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            🏘️ Properti Kamu
+          </h2>
+          <span class="text-slate-500 text-xs transition-transform chevron">▼</span>
+        </div>
+        <div id="props-content" class="collapsible-content open">
+          <div id="active-player-properties" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+            <span class="text-xs text-slate-500 italic">Belum memiliki properti.</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</div>
 
 <!-- MODAL BUY -->
-<div id="modal-property" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-  <div class="modal-anim scale-95 opacity-0 transition-all duration-300 flex justify-center items-center w-full"></div>
+<div id="modal-property" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+  <div class="modal-anim scale-95 opacity-0 transition-all duration-300 flex justify-center items-center w-full modal-box"></div>
 </div>
 
 <!-- MODAL VIEW CARD -->
-<div id="modal-view-card" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-  <div class="modal-anim scale-95 opacity-0 transition-all duration-300 flex justify-center items-center w-full" onclick="event.stopPropagation()"></div>
+<div id="modal-view-card" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+  <div class="modal-anim scale-95 opacity-0 transition-all duration-300 flex justify-center items-center w-full modal-box" onclick="event.stopPropagation()"></div>
 </div>
 
 <!-- MODAL MANAGE -->
-<div id="modal-manage" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-  <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl modal-anim scale-95 opacity-0">
-    <div id="modal-manage-header" class="p-4 text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-extrabold text-lg"></div>
-    <div class="p-5 max-h-[70vh] overflow-y-auto">
+<div id="modal-manage" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl modal-anim scale-95 opacity-0 modal-box">
+    <div id="modal-manage-header" class="p-3 sm:p-4 text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-extrabold text-base sm:text-lg"></div>
+    <div class="p-3 sm:p-5 max-h-[70dvh] overflow-y-auto">
       <div id="manage-content"></div>
     </div>
-    <div class="p-4 border-t border-slate-800">
-      <button onclick="closeModal('modal-manage')" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-slate-300 transition btn-press">Tutup</button>
+    <div class="p-3 sm:p-4 border-t border-slate-800">
+      <button onclick="closeModal('modal-manage')" class="w-full py-2.5 sm:py-3 rounded-xl bg-slate-800 active:bg-slate-700 font-bold text-slate-300 text-sm transition">Tutup</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL DEBT -->
-<div id="modal-debt" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-  <div class="bg-slate-900 border-2 border-rose-500/60 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl modal-anim scale-95 opacity-0">
-    <div class="p-4 text-center bg-gradient-to-r from-rose-600 to-red-700 text-white font-extrabold text-lg">⚠️ HUTANG!</div>
-    <div class="p-6 space-y-4">
-      <p id="debt-message" class="text-sm text-center text-slate-200"></p>
+<div id="modal-debt" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+  <div class="bg-slate-900 border-2 border-rose-500/60 rounded-2xl w-full overflow-hidden shadow-2xl modal-anim scale-95 opacity-0 modal-box">
+    <div class="p-3 sm:p-4 text-center bg-gradient-to-r from-rose-600 to-red-700 text-white font-extrabold text-base sm:text-lg">⚠️ HUTANG!</div>
+    <div class="p-4 sm:p-6 space-y-3">
+      <p id="debt-message" class="text-xs sm:text-sm text-center text-slate-200"></p>
       <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800 text-xs space-y-1.5">
         <div class="flex justify-between text-slate-400"><span>Uangmu:</span><span id="debt-current" class="text-slate-200 font-bold">$0</span></div>
         <div class="flex justify-between text-rose-400"><span>Harus bayar:</span><span id="debt-needed" class="font-bold">$200</span></div>
         <div class="flex justify-between text-amber-400 font-bold pt-1.5 border-t border-slate-800"><span>Kekurangan:</span><span id="debt-shortage">$200</span></div>
       </div>
       <div class="grid grid-cols-1 gap-2">
-        <button onclick="openManageFromDebt()" class="py-3 rounded-xl bg-amber-600 hover:bg-amber-500 font-bold text-white transition btn-press">🏠 Kelola Properti</button>
-        <button onclick="declareBankruptcy()" class="py-3 rounded-xl bg-rose-700 hover:bg-rose-600 font-bold text-white transition btn-press">💀 Bangkrut</button>
+        <button onclick="openManageFromDebt()" class="py-2.5 rounded-xl bg-amber-600 active:bg-amber-500 font-bold text-white text-sm transition">🏠 Kelola Properti</button>
+        <button onclick="declareBankruptcy()" class="py-2.5 rounded-xl bg-rose-700 active:bg-rose-600 font-bold text-white text-sm transition">💀 Bangkrut</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- MODAL JAIL -->
-<div id="modal-jail" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-  <div class="bg-slate-900 border-2 border-slate-700 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl modal-anim scale-95 opacity-0">
-    <div class="p-4 text-center bg-gradient-to-r from-slate-700 to-slate-800 text-white font-extrabold text-lg">🚔 KAMU DI PENJARA</div>
-    <div class="p-6 space-y-4">
-      <div class="text-center text-5xl">🔒</div>
-      <p class="text-sm text-center text-slate-200">Pilih cara keluar:</p>
+<div id="modal-jail" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+  <div class="bg-slate-900 border-2 border-slate-700 rounded-2xl w-full overflow-hidden shadow-2xl modal-anim scale-95 opacity-0 modal-box">
+    <div class="p-3 sm:p-4 text-center bg-gradient-to-r from-slate-700 to-slate-800 text-white font-extrabold text-base sm:text-lg">🚔 PENJARA</div>
+    <div class="p-4 sm:p-6 space-y-3">
+      <div class="text-center text-4xl sm:text-5xl">🔒</div>
+      <p class="text-xs sm:text-sm text-center text-slate-200">Pilih cara keluar:</p>
       <div class="grid grid-cols-1 gap-2">
-        <button id="jail-btn-card" onclick="useJailCard()" class="hidden py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-white transition btn-press">
-          🎴 Pakai Kartu Bebas Penjara <span id="jail-card-count" class="text-xs bg-blue-900/50 px-2 py-0.5 rounded">0</span>
+        <button id="jail-btn-card" onclick="useJailCard()" class="hidden py-2.5 rounded-xl bg-blue-600 active:bg-blue-500 font-bold text-white text-sm transition">
+          🎴 Pakai Kartu Bebas <span id="jail-card-count" class="text-xs bg-blue-900/50 px-2 py-0.5 rounded">0</span>
         </button>
-        <button onclick="payBail()" class="py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-white transition btn-press">
-          💵 Bayar Bail <span class="text-xs bg-emerald-900/50 px-2 py-0.5 rounded">$50</span>
+        <button onclick="payBail()" class="py-2.5 rounded-xl bg-emerald-600 active:bg-emerald-500 font-bold text-white text-sm transition">
+          💵 Bayar Bail $50
         </button>
-        <button onclick="rollForDoubles()" class="py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-white transition btn-press">
+        <button onclick="rollForDoubles()" class="py-2.5 rounded-xl bg-blue-600 active:bg-blue-500 font-bold text-white text-sm transition">
           🎲 Coba Kocok Double
         </button>
-        <button onclick="closeModal('modal-jail'); handleEndTurn();" class="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-slate-300 border border-slate-700 transition btn-press">
-          ⏳ Lewati Giliran
+        <button onclick="closeModal('modal-jail'); handleEndTurn();" class="py-2.5 rounded-xl bg-slate-800 active:bg-slate-700 font-bold text-slate-300 border border-slate-700 text-sm transition">
+          ⏳ Lewati
         </button>
       </div>
       <div class="text-[11px] text-center text-slate-400">Percobaan: <span id="jail-attempts">0</span>/3</div>
@@ -691,73 +913,82 @@
 </div>
 
 <!-- MODAL CARD -->
-<div id="modal-card" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-  <div id="card-modal-inner" class="bg-slate-900 border border-amber-500/40 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl space-y-4">
-    <div id="card-badge" class="w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 text-2xl font-black flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30">?</div>
-    <h3 id="card-title" class="text-xl font-black text-amber-400">KARTU</h3>
-    <p id="card-message" class="text-sm text-slate-200 bg-slate-950/80 p-4 rounded-xl border border-slate-800">—</p>
-    <button id="card-continue-btn" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 font-extrabold text-slate-950 transition shadow-lg shadow-amber-500/20 btn-press">Lanjut →</button>
+<div id="modal-card" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+  <div id="card-modal-inner" class="bg-slate-900 border border-amber-500/40 rounded-2xl w-full p-5 sm:p-6 text-center shadow-2xl space-y-3 modal-box">
+    <div id="card-badge" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-500 text-slate-950 text-xl sm:text-2xl font-black flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30">?</div>
+    <h3 id="card-title" class="text-lg sm:text-xl font-black text-amber-400">KARTU</h3>
+    <p id="card-message" class="text-xs sm:text-sm text-slate-200 bg-slate-950/80 p-3 sm:p-4 rounded-xl border border-slate-800">—</p>
+    <button id="card-continue-btn" class="w-full py-3 rounded-xl bg-amber-500 active:bg-amber-400 font-extrabold text-slate-950 text-sm transition shadow-lg">Lanjut →</button>
   </div>
 </div>
 
 <!-- MODAL TRAIN -->
-<div id="modal-train" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-  <div class="bg-slate-900 border-2 border-purple-500/40 rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl modal-anim scale-95 opacity-0">
-    <div class="p-4 text-center bg-gradient-to-r from-purple-700 to-violet-800 text-white font-extrabold text-lg">
-      🚂 KERETA TEMBUS NUSANTARA
+<div id="modal-train" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+  <div class="bg-slate-900 border-2 border-purple-500/40 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl modal-anim scale-95 opacity-0 modal-box">
+    <div class="p-3 sm:p-4 text-center bg-gradient-to-r from-purple-700 to-violet-800 text-white font-extrabold text-base sm:text-lg">
+      🚂 KERETA TEMBUS
     </div>
-    <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
-      <p class="text-xs text-center text-slate-400">
-        Pilih stasiun tujuan. Kereta bisa menembus lokasi mana saja!
-      </p>
-      <div id="train-tiles-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2"></div>
+    <div class="p-3 sm:p-5 max-h-[65dvh] overflow-y-auto">
+      <p class="text-[11px] sm:text-xs text-center text-slate-400 mb-3">Pilih stasiun tujuan</p>
+      <div id="train-tiles-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5 sm:gap-2"></div>
     </div>
-    <div class="p-4 border-t border-slate-800">
-      <button onclick="closeModal('modal-train')" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-slate-300 transition btn-press">Batal</button>
+    <div class="p-3 sm:p-4 border-t border-slate-800">
+      <button onclick="closeModal('modal-train')" class="w-full py-2.5 rounded-xl bg-slate-800 active:bg-slate-700 font-bold text-slate-300 text-sm transition">Batal</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL CANCEL ULTIMATE -->
-<div id="modal-cancel-ultimate" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-  <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl modal-anim scale-95 opacity-0">
-    <div class="p-4 text-center bg-gradient-to-r from-amber-600 to-yellow-700 text-slate-950 font-extrabold text-lg">
-      🎴 KARTU CANCEL ULTIMATE
+<div id="modal-cancel-ultimate" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+  <div class="bg-slate-900 border-2 border-amber-500/60 rounded-2xl w-full overflow-hidden shadow-2xl modal-anim scale-95 opacity-0 modal-box">
+    <div class="p-3 sm:p-4 text-center bg-gradient-to-r from-amber-600 to-yellow-700 text-slate-950 font-extrabold text-base sm:text-lg">
+      🎴 CANCEL ULTIMATE
     </div>
-    <div class="p-6 space-y-4">
-      <div class="text-center text-5xl">🚫👑</div>
-      <p class="text-sm text-center text-slate-200">
-        Gunakan kartu ini untuk <b>membatalkan Ultimate</b> yang sedang aktif!
-      </p>
-      <div class="grid grid-cols-2 gap-3">
-        <button onclick="activateCancelUltimate()" class="py-3 rounded-xl bg-amber-600 hover:bg-amber-500 font-bold text-white transition btn-press">✅ Pakai</button>
-        <button onclick="closeModal('modal-cancel-ultimate')" class="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-slate-300 border border-slate-700 transition btn-press">Batal</button>
+    <div class="p-4 sm:p-6 space-y-3 text-center">
+      <div class="text-4xl sm:text-5xl">🚫👑</div>
+      <p class="text-xs sm:text-sm text-slate-200">Batalkan Ultimate yang sedang aktif?</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="activateCancelUltimate()" class="py-2.5 rounded-xl bg-amber-600 active:bg-amber-500 font-bold text-white text-sm transition">✅ Pakai</button>
+        <button onclick="closeModal('modal-cancel-ultimate')" class="py-2.5 rounded-xl bg-slate-800 active:bg-slate-700 font-bold text-slate-300 border border-slate-700 text-sm transition">Batal</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- MODAL WINNER -->
-<div id="modal-winner" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4 z-50 hidden">
+<div id="modal-winner" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 z-50 hidden">
   <canvas id="confetti-canvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
-  <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border border-indigo-500/40 rounded-3xl max-w-md w-full p-8 text-center shadow-2xl relative z-10 space-y-5 modal-card-flip">
-    <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 text-5xl flex items-center justify-center mx-auto shadow-2xl shadow-yellow-500/40 animate-bounce">🏆</div>
+  <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border border-indigo-500/40 rounded-2xl w-full p-6 sm:p-8 text-center shadow-2xl relative z-10 space-y-4 modal-box modal-card-flip">
+    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 text-4xl sm:text-5xl flex items-center justify-center mx-auto shadow-2xl shadow-yellow-500/40 animate-bounce">🏆</div>
     <div>
-      <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 tracking-tight">PEMENANG!</h2>
+      <h2 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 tracking-tight">PEMENANG!</h2>
     </div>
-    <div class="bg-slate-950/80 p-4 rounded-2xl border border-indigo-900/50 space-y-3">
-      <div class="text-sm text-slate-400">Juara:</div>
-      <div id="winner-name" class="text-2xl font-black text-amber-300">—</div>
-      <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-800">
+    <div class="bg-slate-950/80 p-3 sm:p-4 rounded-2xl border border-indigo-900/50 space-y-2">
+      <div class="text-xs sm:text-sm text-slate-400">Juara:</div>
+      <div id="winner-name" class="text-xl sm:text-2xl font-black text-amber-300">—</div>
+      <div class="grid grid-cols-2 gap-2 text-[11px] sm:text-xs pt-2 border-t border-slate-800">
         <div><span class="text-slate-400">Uang:</span> <span id="winner-cash" class="font-bold text-emerald-400">$0</span></div>
         <div><span class="text-slate-400">Properti:</span> <span id="winner-props" class="font-bold text-blue-400">0</span></div>
       </div>
     </div>
-    <button onclick="resetGame(); closeModal('modal-winner');" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 hover:from-indigo-400 hover:to-purple-500 font-extrabold text-white text-base shadow-xl shadow-indigo-500/30 transition btn-press">Main Lagi 🔄</button>
+    <button onclick="resetGame(); closeModal('modal-winner');" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 active:from-indigo-400 active:to-purple-500 font-extrabold text-white text-sm sm:text-base shadow-xl transition">Main Lagi 🔄</button>
   </div>
 </div>
 
 <script>
+/* ============================================================ UTILS ============================================================ */
+function toggleCollapse(id, headerEl) {
+  const el = document.getElementById(id);
+  const chevron = headerEl.querySelector('.chevron');
+  if (el.classList.contains('open')) {
+    el.classList.remove('open');
+    if (chevron) chevron.style.transform = 'rotate(-90deg)';
+  } else {
+    el.classList.add('open');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
 /* ============================================================ AUDIO ============================================================ */
 let soundEnabled = true;
 let audioCtx = null;
@@ -880,48 +1111,18 @@ const state = {
   jailAttempts: 0,
   currentDiceTotal: 0,
   ultimate: {
-    active: false,
-    type: null,          // 'rongawi' | 'storm' | 'tax' | 'fury'
-    ownerId: null,
-    roundsLeft: 0,
-    originalOwners: {},
-    originalHouses: {},
-    originalMortgaged: {}
+    active: false, type: null, ownerId: null, roundsLeft: 0,
+    originalOwners: {}, originalHouses: {}, originalMortgaged: {}
   },
   trainTokens: {},
   _pendingCardIdx: null
 };
 
-/* ============================================================ ULTIMATE DEFINITIONS ============================================================ */
 const ULTIMATE_TYPES = {
-  rongawi: {
-    name: 'KEKAISARAN RONGAWI SUCI',
-    icon: '👑',
-    duration: 2,
-    desc: 'SEMUA tile properti kena PAJAK 2× sewa ke pemilik Rongawi!',
-    boardClass: 'ultimate-active'
-  },
-  storm: {
-    name: 'BADAI NUSANTARA',
-    icon: '🌪️',
-    duration: 1,
-    desc: 'Semua lawan mundur 5 langkah & bayar $50 ke pemilik!',
-    boardClass: 'storm-active'
-  },
-  tax: {
-    name: 'PAJAK KEKAISARAN',
-    icon: '💰',
-    duration: 1,
-    desc: 'Semua lawan bayar 10% kekayaan ke pemilik selama 1 ronde!',
-    boardClass: 'ultimate-active'
-  },
-  fury: {
-    name: 'AMUKAN RONGAWI',
-    icon: '🔥',
-    duration: 1,
-    desc: 'Semua rumah milik pemilik di board upgrade +1 level gratis!',
-    boardClass: 'ultimate-active'
-  }
+  rongawi: { name: 'KEKAISARAN RONGAWI SUCI', icon: '👑', duration: 2, desc: 'SEMUA tile properti kena PAJAK 2× sewa ke pemilik Rongawi!', boardClass: 'ultimate-active' },
+  storm:   { name: 'BADAI NUSANTARA',         icon: '🌪️', duration: 1, desc: 'Semua lawan mundur 5 langkah & bayar $50 ke pemilik!', boardClass: 'storm-active' },
+  tax:     { name: 'PAJAK KEKAISARAN',        icon: '💰', duration: 1, desc: 'Semua lawan bayar 10% kekayaan ke pemilik!', boardClass: 'ultimate-active' },
+  fury:    { name: 'AMUKAN RONGAWI',          icon: '🔥', duration: 1, desc: 'Semua rumah milik pemilik upgrade +1 level gratis!', boardClass: 'ultimate-active' }
 };
 
 /* ============================================================ INIT ============================================================ */
@@ -936,7 +1137,7 @@ function initBoardUI() {
     div.id = `tile-${tile.id}`;
     div.style.gridColumn = `${tile.col} / span 1`;
     div.style.gridRow = `${tile.row} / span 1`;
-    div.className = `tile relative bg-slate-900 border border-slate-800/80 p-1 flex flex-col justify-between overflow-hidden text-[10px] select-none cursor-pointer`;
+    div.className = `tile relative bg-slate-900 border border-slate-800/80 flex flex-col justify-between text-[8px] sm:text-[10px] select-none`;
     if (tile.isUltimateTile) div.classList.add('tile-rongawi');
 
     const headerColor = tile.bg || 'bg-slate-800';
@@ -944,19 +1145,19 @@ function initBoardUI() {
     const priceTag = tile.price > 0 ? `$${tile.price}` : '';
 
     div.innerHTML = `
-      ${!isCorner && tile.bg ? `<div class="${headerColor} h-2.5 w-full rounded-xs shadow-sm"></div>` : ''}
+      ${!isCorner && tile.bg ? `<div class="${headerColor} h-1.5 sm:h-2.5 w-full shadow-sm"></div>` : ''}
       ${isCorner ? `<div class="absolute inset-0 flex flex-col items-center justify-center ${tile.bg || 'bg-slate-800/40'}">
-        <span class="text-2xl">${tile.icon || ''}</span>
-        <span class="text-[8px] font-black text-white text-center px-1 mt-0.5 leading-tight">${tile.name}</span>
+        <span class="text-sm sm:text-2xl">${tile.icon || ''}</span>
+        <span class="text-[6px] sm:text-[8px] font-black text-white text-center px-0.5 leading-tight">${tile.name}</span>
       </div>` : ''}
-      ${!isCorner && tile.icon ? `<div class="text-center text-lg mt-0.5">${tile.icon}</div>` : ''}
-      ${!isCorner ? `<div class="font-bold text-[8px] md:text-[9px] text-slate-200 leading-tight truncate mt-0.5 px-0.5" title="${tile.name}">${tile.name}</div>` : ''}
-      ${!isCorner ? `<div class="flex items-center justify-between w-full mt-auto px-0.5">
-        <span class="text-[7px] text-slate-400 font-semibold">${priceTag}</span>
-        <div id="houses-tile-${tile.id}" class="flex gap-0.5"></div>
+      ${!isCorner && tile.icon ? `<div class="text-center text-[10px] sm:text-lg mt-0.5 leading-none">${tile.icon}</div>` : ''}
+      ${!isCorner ? `<div class="font-bold text-[6px] sm:text-[8px] text-slate-200 leading-tight truncate px-0.5" title="${tile.name}">${tile.name}</div>` : ''}
+      ${!isCorner ? `<div class="flex items-center justify-between w-full px-0.5">
+        <span class="text-[5px] sm:text-[7px] text-slate-400 font-semibold">${priceTag}</span>
+        <div id="houses-tile-${tile.id}" class="flex gap-0.5 leading-none"></div>
       </div>` : ''}
-      <div id="owner-badge-${tile.id}" class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full hidden shadow-lg"></div>
-      <div id="tokens-container-${tile.id}" class="absolute inset-0 flex flex-wrap items-center justify-center gap-0.5 p-0.5 pointer-events-none z-20"></div>
+      <div id="owner-badge-${tile.id}" class="absolute top-0 right-0 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full hidden shadow-lg"></div>
+      <div id="tokens-container-${tile.id}" class="absolute inset-0 flex flex-wrap items-center justify-center gap-0.5 pointer-events-none z-20"></div>
     `;
 
     div.addEventListener('click', (e) => {
@@ -977,7 +1178,7 @@ function initBoardUI() {
 
   updatePlayersUI();
   renderTokensOnBoard();
-  addLog('🎲 Monopoli Nusantara Ultimate Rework dimulai!', 'system');
+  addLog('🎲 Monopoli dimulai!', 'system');
   setInitialDice();
   updateCardHandUI();
   updateTrainButtonUI();
@@ -999,7 +1200,7 @@ function renderTokensOnBoard(hoppingPlayerId = null) {
     const container = document.getElementById(`tokens-container-${player.pos}`);
     if (!container) return;
     const tokenSpan = document.createElement('span');
-    tokenSpan.className = `token-pawn text-base md:text-lg cursor-pointer`;
+    tokenSpan.className = `token-pawn text-[10px] sm:text-base md:text-lg cursor-pointer`;
     if (player.id === state.currentTurnIndex) tokenSpan.classList.add('token-active');
     if (hoppingPlayerId === player.id) tokenSpan.classList.add('token-hopping');
     tokenSpan.innerText = player.token;
@@ -1013,8 +1214,8 @@ function updatePlayersUI() {
   PLAYERS.forEach((p, idx) => {
     const isActive = idx === state.currentTurnIndex;
     const card = document.createElement('div');
-    card.className = `p-3 rounded-xl border transition-all duration-500 ${
-      isActive ? `${p.border} bg-slate-900/90 shadow-lg ring-1 scale-[1.02]` : 'border-slate-800 bg-slate-950/40 opacity-70'
+    card.className = `p-2.5 rounded-xl border transition-all duration-500 ${
+      isActive ? `${p.border} bg-slate-900/90 shadow-lg ring-1` : 'border-slate-800 bg-slate-950/40 opacity-70'
     }`;
     const propCount = Object.keys(state.propertyOwners).filter(tid => state.propertyOwners[tid] === p.id).length;
     const totalHouses = Object.keys(state.propertyHouses)
@@ -1022,24 +1223,23 @@ function updatePlayersUI() {
       .reduce((sum, tid) => sum + state.propertyHouses[tid], 0);
 
     card.innerHTML = `
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">${p.token}</span>
-          <div>
-            <div class="font-extrabold text-xs text-slate-200 flex items-center gap-1 flex-wrap">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-base sm:text-lg">${p.token}</span>
+          <div class="min-w-0">
+            <div class="font-extrabold text-[11px] sm:text-xs text-slate-200 flex items-center gap-1 flex-wrap">
               ${p.name}
-              ${isActive ? `<span class="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full font-bold">TURN</span>` : ''}
+              ${isActive ? `<span class="text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full font-bold">TURN</span>` : ''}
               ${state.ultimate.active && state.ultimate.ownerId === p.id ? `<span class="ultimate-badge">${ULTIMATE_TYPES[state.ultimate.type].icon} ${state.ultimate.roundsLeft}</span>` : ''}
               ${p.isAI && isActive ? `<span class="ai-thinking"><span></span><span></span><span></span></span>` : ''}
             </div>
-            <div class="text-[10px] text-slate-400">📍 ${BOARD_TILES[p.pos].name}</div>
+            <div class="text-[9px] text-slate-400 truncate">📍 ${BOARD_TILES[p.pos].name}</div>
           </div>
         </div>
-        <div class="text-right">
-          <div class="font-black text-sm ${p.money < 0 ? 'text-rose-400' : 'text-emerald-400'} transition-all ${isActive ? 'scale-110' : ''}">$${p.money}</div>
-          <div class="text-[9px] text-slate-400">🏘️ ${propCount} • 🏠 ${totalHouses}</div>
-          <div class="text-[9px] text-slate-400">🎴 ${p.hand.length} • 🚂 ${state.trainTokens[p.id] || 0}</div>
-          <div class="text-[9px] ${p.bankrupt ? 'text-rose-400 font-bold' : p.inJail ? 'text-amber-400' : 'text-slate-400'}">
+        <div class="text-right shrink-0">
+          <div class="font-black text-[12px] sm:text-sm ${p.money < 0 ? 'text-rose-400' : 'text-emerald-400'}">$${p.money}</div>
+          <div class="text-[8px] text-slate-400">🏘️${propCount} 🏠${totalHouses} 🎴${p.hand.length}</div>
+          <div class="text-[8px] ${p.bankrupt ? 'text-rose-400 font-bold' : p.inJail ? 'text-amber-400' : 'text-slate-400'}">
             ${p.bankrupt ? '💀 BANGKRUT' : p.inJail ? '🔒 PENJARA' : '● Aktif'}
           </div>
         </div>
@@ -1051,7 +1251,7 @@ function updatePlayersUI() {
   const currP = PLAYERS[state.currentTurnIndex];
   const badge = document.getElementById('current-turn-badge');
   badge.innerHTML = `
-    <span class="w-3 h-3 rounded-full ${currP.color} inline-block shadow-sm animate-pulse"></span>
+    <span class="w-2.5 h-2.5 rounded-full ${currP.color} inline-block animate-pulse"></span>
     ${currP.name} ${currP.isAI ? '🤖' : '👤'}
   `;
 
@@ -1066,9 +1266,7 @@ function updateUltimateStatusBadge() {
     const owner = PLAYERS[state.ultimate.ownerId];
     const ult = ULTIMATE_TYPES[state.ultimate.type];
     badge.innerHTML = `${ult.icon} ${owner.token} ${state.ultimate.roundsLeft}`;
-  } else {
-    badge.classList.add('hidden');
-  }
+  } else badge.classList.add('hidden');
 }
 
 function updateActivePlayerPropertiesUI() {
@@ -1088,10 +1286,10 @@ function updateActivePlayerPropertiesUI() {
     const chip = document.createElement('div');
     const houses = state.propertyHouses[tid] || 0;
     const isMort = state.mortgaged[tid];
-    chip.className = `px-2 py-1 rounded-lg bg-slate-800 border text-[10px] font-bold text-slate-200 flex items-center gap-1 transition hover:scale-105 cursor-pointer ${isMort ? 'border-rose-700 opacity-60' : 'border-slate-700'}`;
+    chip.className = `px-2 py-1 rounded-lg bg-slate-800 border text-[10px] font-bold text-slate-200 flex items-center gap-1 ${isMort ? 'border-rose-700 opacity-60' : 'border-slate-700'}`;
     chip.innerHTML = `
       <span class="w-2 h-2 rounded-full ${tile.bg || 'bg-slate-500'}"></span>
-      ${tile.name}
+      <span class="truncate">${tile.name}</span>
       ${houses === 5 ? '<span class="text-amber-400">🏨</span>' : houses > 0 ? `<span class="text-emerald-400">${'🏠'.repeat(houses)}</span>` : ''}
       ${isMort ? '<span class="text-rose-400">🔒</span>' : ''}
     `;
@@ -1100,7 +1298,7 @@ function updateActivePlayerPropertiesUI() {
   });
 
   const manageBtn = document.createElement('button');
-  manageBtn.className = 'w-full mt-2 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-[10px] font-bold text-white transition btn-press';
+  manageBtn.className = 'w-full mt-2 px-3 py-2 rounded-lg bg-indigo-600 text-[10px] font-bold text-white transition';
   manageBtn.innerText = '⚙️ Kelola Properti';
   manageBtn.onclick = () => openManageModal();
   container.appendChild(manageBtn);
@@ -1124,7 +1322,7 @@ function updateCardHandUI() {
                 card.type === 'ulti' ? 'mini-card-ulti' : 'mini-card-cancel';
     el.className = `mini-card ${cls}`;
     el.innerText = card.icon;
-    el.title = `${card.name}\n${card.desc}`;
+    el.title = `${card.name}: ${card.desc}`;
     el.onclick = () => useCard(idx);
     container.appendChild(el);
   });
@@ -1133,15 +1331,14 @@ function updateCardHandUI() {
 function updateTrainButtonUI() {
   const count = state.trainTokens[0] || 0;
   document.getElementById('train-count').innerText = count;
-  const btn = document.getElementById('btn-train');
-  btn.disabled = count <= 0;
+  document.getElementById('btn-train').disabled = count <= 0;
 }
 
 /* ============================================================ LOG ============================================================ */
 function addLog(msg, type = 'normal') {
   const feed = document.getElementById('game-log-feed');
   const item = document.createElement('div');
-  item.className = `log-entry p-2 rounded-lg border text-[11px] leading-snug flex items-start gap-2 ${
+  item.className = `log-entry p-1.5 rounded-lg border text-[10px] sm:text-[11px] leading-snug flex items-start gap-1.5 ${
     type === 'buy' ? 'bg-emerald-950/30 border-emerald-800/40 text-emerald-300' :
     type === 'tax' ? 'bg-rose-950/30 border-rose-800/40 text-rose-300' :
     type === 'roll' ? 'bg-blue-950/30 border-blue-800/40 text-blue-300' :
@@ -1152,10 +1349,10 @@ function addLog(msg, type = 'normal') {
     type === 'train' ? 'bg-violet-950/30 border-violet-800/40 text-violet-300' :
     'bg-slate-900 border-slate-800 text-slate-300'
   }`;
-  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  item.innerHTML = `<span class="text-[9px] text-slate-500 mt-0.5">${time}</span><div class="flex-1">${msg}</div>`;
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  item.innerHTML = `<span class="text-[8px] text-slate-500 mt-0.5 shrink-0">${time}</span><div class="flex-1 break-words">${msg}</div>`;
   feed.prepend(item);
-  if (feed.children.length > 80) feed.lastChild.remove();
+  if (feed.children.length > 50) feed.lastChild.remove();
 }
 
 /* ============================================================ PROPERTY CARD ============================================================ */
@@ -1167,8 +1364,7 @@ function renderPropertyCard(tile, opts = {}) {
   const isMort = state.mortgaged[tile.id];
   const isUltimated = state.ultimate.active && state.ultimate.type === 'rongawi';
 
-  let statusClass = 'status-available';
-  let statusText = 'AVAILABLE';
+  let statusClass = 'status-available', statusText = 'AVAILABLE';
   if (isUltimated && owner) { statusClass = 'status-ultimate'; statusText = '👑 ULTIMATE'; }
   else if (isMort) { statusClass = 'status-mortgaged'; statusText = '🔒 MORTGAGED'; }
   else if (owner) {
@@ -1204,32 +1400,20 @@ function renderPropertyCard(tile, opts = {}) {
       <div class="property-card-rent-row"><span>1 Perusahaan</span><span class="val">${tile.rent[0]}× dadu</span></div>
       <div class="property-card-rent-row highlight"><span>2 Perusahaan</span><span class="val">${tile.rent[1]}× dadu</span></div>
     `;
-  } else {
-    rentHTML = `<div class="property-card-desc">Kartu ${tile.type}</div>`;
-  }
+  } else rentHTML = `<div class="property-card-desc">Kartu ${tile.type}</div>`;
 
   let ketBin = '';
-  if (tile.isUltimateTile) {
-    ketBin = `👑 <b>ULTIMATE TILE</b> — Saat lawan mendarat, semua tile properti kena pajak 2× sewa ke pemilik selama 2 ronde!`;
-  } else if (tile.houseCost) {
-    ketBin = `💵 Harga rumah: <b>$${tile.houseCost}</b> • Hotel: <b>$${tile.houseCost}</b> (dari 5 rumah) • Mortgage: <b>$${Math.floor(tile.price/2)}</b>`;
-  } else if (tile.type === 'tax') {
-    ketBin = `💸 Pajak: <b>$${tile.price}</b>`;
-  } else if (tile.type === 'railroad') {
-    ketBin = `🚂 Bisa dipakai buat <b>tembus</b>!`;
-  } else if (tile.type === 'go') {
-    ketBin = `💰 Lewat tile ini: <b>+$200</b>`;
-  } else if (tile.type === 'gotojail') {
-    ketBin = `🚔 Langsung ke penjara`;
-  } else if (tile.type === 'jail') {
-    ketBin = `🔒 Bail $50 / tunggu 3 turn`;
-  } else {
-    ketBin = `Kartu khusus`;
-  }
+  if (tile.isUltimateTile) ketBin = `👑 <b>ULTIMATE</b> — Semua tile properti kena pajak 2× sewa ke pemilik selama 2 ronde!`;
+  else if (tile.houseCost) ketBin = `💵 Harga rumah: <b>$${tile.houseCost}</b> • Mortgage: <b>$${Math.floor(tile.price/2)}</b>`;
+  else if (tile.type === 'tax') ketBin = `💸 Pajak: <b>$${tile.price}</b>`;
+  else if (tile.type === 'railroad') ketBin = `🚂 Bisa dipakai buat <b>tembus</b>!`;
+  else if (tile.type === 'go') ketBin = `💰 Lewat tile ini: <b>+$200</b>`;
+  else if (tile.type === 'gotojail') ketBin = `🚔 Langsung ke penjara`;
+  else if (tile.type === 'jail') ketBin = `🔒 Bail $50 / tunggu 3 turn`;
+  else ketBin = `Kartu khusus`;
 
   const housesDisplay = houses === 5 ? '🏨 HOTEL' : houses > 0 ? `${'🏠'.repeat(houses)} (${houses})` : 'Tanah kosong';
 
-  // Actions
   let actionsHTML = '';
   if (showActions && player) {
     if (actionContext === 'buy') {
@@ -1249,25 +1433,15 @@ function renderPropertyCard(tile, opts = {}) {
       const canSellLand = !isMort && houses === 0 && tile.price > 0;
 
       actionsHTML = `<div class="property-card-actions">`;
-      if (canBuild) {
-        actionsHTML += `<button class="btn-build" onclick="doBuildHouse(${player.id}, ${tile.id})">🏠 Bangun $${tile.houseCost}</button>`;
-      }
-      if (canUpgradeHotel) {
-        actionsHTML += `<button class="btn-hotel" onclick="doUpgradeHotel(${player.id}, ${tile.id})">🏨 Upgrade Hotel $${tile.houseCost}</button>`;
-      }
+      if (canBuild) actionsHTML += `<button class="btn-build" onclick="doBuildHouse(${player.id}, ${tile.id})">🏠 Bangun $${tile.houseCost}</button>`;
+      if (canUpgradeHotel) actionsHTML += `<button class="btn-hotel" onclick="doUpgradeHotel(${player.id}, ${tile.id})">🏨 Hotel $${tile.houseCost}</button>`;
       if (canSellHouse) {
         const sellPrice = houses === 5 ? Math.floor(tile.houseCost * 0.5) : Math.floor(tile.houseCost / 2);
-        actionsHTML += `<button class="btn-sell" onclick="doSellHouse(${player.id}, ${tile.id})">💸 Jual ${houses === 5 ? 'Hotel' : 'Rumah'} +$${sellPrice}</button>`;
+        actionsHTML += `<button class="btn-sell" onclick="doSellHouse(${player.id}, ${tile.id})">💸 Jual +$${sellPrice}</button>`;
       }
-      if (canMort) {
-        actionsHTML += `<button class="btn-mort" onclick="doMortgage(${player.id}, ${tile.id})">🔒 Mortgage +$${Math.floor(tile.price/2)}</button>`;
-      }
-      if (canUnmort) {
-        actionsHTML += `<button class="btn-unmort" onclick="doUnmortgage(${player.id}, ${tile.id})">🔓 Tebus -$${Math.floor(tile.price * 0.55)}</button>`;
-      }
-      if (canSellLand) {
-        actionsHTML += `<button class="btn-land" onclick="doSellLand(${player.id}, ${tile.id})">🏚️ Jual Tanah +$${Math.floor(tile.price / 2)}</button>`;
-      }
+      if (canMort) actionsHTML += `<button class="btn-mort" onclick="doMortgage(${player.id}, ${tile.id})">🔒 Mortgage +$${Math.floor(tile.price/2)}</button>`;
+      if (canUnmort) actionsHTML += `<button class="btn-unmort" onclick="doUnmortgage(${player.id}, ${tile.id})">🔓 Tebus -$${Math.floor(tile.price * 0.55)}</button>`;
+      if (canSellLand) actionsHTML += `<button class="btn-land" onclick="doSellLand(${player.id}, ${tile.id})">🏚️ Jual Tanah +$${Math.floor(tile.price / 2)}</button>`;
       actionsHTML += `</div>`;
     }
   }
@@ -1298,7 +1472,7 @@ function renderPropertyCard(tile, opts = {}) {
 /* ============================================================ POPUP ============================================================ */
 function showPropertyCardPopup(tile) {
   if (!['property', 'railroad', 'utility', 'tax', 'jail', 'go', 'gotojail'].includes(tile.type)) {
-    document.getElementById('action-banner').innerHTML = `<b>${tile.name}</b> • ${tile.type}`;
+    document.getElementById('action-banner').innerHTML = `<b>${tile.name}</b>`;
     return;
   }
   const modal = document.getElementById('modal-view-card');
@@ -1343,14 +1517,14 @@ function handleRollDice() {
 
     state.currentDiceTotal = total;
     const isDouble = val1 === val2;
-    addLog(`<b>${player.name}</b>: <b>${val1} + ${val2} = ${total}</b>${isDouble ? ' 🎯 DOUBLE!' : ''}`, 'roll');
+    addLog(`<b>${player.name}</b>: <b>${val1}+${val2}=${total}</b>${isDouble ? ' 🎯' : ''}`, 'roll');
 
     if (player.inJail) { handleJailRoll(player, val1, val2, total); return; }
 
     if (isDouble) {
       state.doublesCount++;
       if (state.doublesCount === 3) {
-        addLog(`🚔 ${player.name} 3x double → PENJARA!`, 'jail');
+        addLog(`🚔 3x double → PENJARA!`, 'jail');
         sendToJail(player);
         state.doublesCount = 0;
         state.phase = 'end-turn';
@@ -1359,7 +1533,7 @@ function handleRollDice() {
       }
     } else state.doublesCount = 0;
 
-    animateMoveToken(player, total, () => { handleTileAction(player); });
+    animateMoveToken(player, total, () => handleTileAction(player));
   }, 1100);
 }
 
@@ -1397,7 +1571,7 @@ function animateMoveToken(player, stepsLeft, onDone) {
     tileEl.classList.add('tile-landed');
     setTimeout(() => tileEl.classList.remove('tile-landed'), 800);
   }
-  setTimeout(() => animateMoveToken(player, stepsLeft - 1, onDone), 200);
+  setTimeout(() => animateMoveToken(player, stepsLeft - 1, onDone), 180);
 }
 
 function showFloatingMoney(player, text) {
@@ -1413,29 +1587,22 @@ function showFloatingMoney(player, text) {
 /* ============================================================ TILE ACTIONS ============================================================ */
 function handleTileAction(player) {
   const tile = BOARD_TILES[player.pos];
-  document.getElementById('action-banner').innerHTML = `Mendarat di <span class="font-bold text-amber-400">${tile.name}</span>`;
+  document.getElementById('action-banner').innerHTML = `Di <b>${tile.name}</b>`;
 
-  // === CEK ULTIMATE RONGAWI ===
   if (state.ultimate.active && state.ultimate.type === 'rongawi') {
     const isSpecialTile = ['corner', 'special', 'rr', 'util'].includes(tile.group);
-    const isProperty = tile.type === 'property';
-
-    if (isProperty && !isSpecialTile) {
-      // Semua properti (milik siapapun) kena pajak 2x sewa ke Rongawi owner
+    if (tile.type === 'property' && !isSpecialTile) {
       const ultOwner = PLAYERS[state.ultimate.ownerId];
       const baseRent = calculateRent(tile, state.currentDiceTotal);
-      const ultRent = Math.max(baseRent * 2, tile.rent[0] * 2); // min 2x base rent
-      addLog(`👑 <b>PAJAK KEKAISARAN!</b> ${player.name} mendarat di <b>${tile.name}</b> — bayar <b>$${ultRent}</b> ke ${ultOwner.name}!`, 'ultimate');
-      attemptPayment(player, ultRent, ultOwner.id, `pajak kekaisaran ${tile.name}`);
+      const ultRent = Math.max(baseRent * 2, tile.rent[0] * 2);
+      addLog(`👑 PAJAK KEKAISARAN! ${player.name} bayar <b>$${ultRent}</b> ke ${ultOwner.name}!`, 'ultimate');
+      attemptPayment(player, ultRent, ultOwner.id, `pajak kekaisaran`);
       return;
     }
-    // Tile corner/special/rr/util → normal
   }
 
-  // === Cek tile ultimate ===
   if (checkUltimateTrigger(player)) return;
 
-  // === Normal flow ===
   if (['property', 'railroad', 'utility'].includes(tile.type)) {
     const ownerId = state.propertyOwners[tile.id];
     if (ownerId === undefined) {
@@ -1452,18 +1619,18 @@ function handleTileAction(player) {
       }
       const owner = PLAYERS[ownerId];
       const rent = calculateRent(tile, state.currentDiceTotal);
-      addLog(`💸 ${player.name} bayar sewa <b>$${rent}</b> ke <b>${owner.name}</b> (${tile.name})`, 'tax');
+      addLog(`💸 ${player.name} bayar sewa <b>$${rent}</b> ke ${owner.name}`, 'tax');
       attemptPayment(player, rent, owner.id, `sewa ${tile.name}`);
     }
     else {
-      addLog(`${player.name} mendarat di properti sendiri: <b>${tile.name}</b>`, 'normal');
+      addLog(`${player.name} di properti sendiri: <b>${tile.name}</b>`, 'normal');
       state.phase = 'end-turn';
       endTurnAfterDelay();
     }
   }
   else if (tile.type === 'tax') {
-    addLog(`${player.name} bayar <b>${tile.name}</b>: <b>$${tile.price}</b>`, 'tax');
-    attemptPayment(player, tile.price, null, `pajak ${tile.name}`);
+    addLog(`${player.name} bayar <b>${tile.name}</b>: $${tile.price}`, 'tax');
+    attemptPayment(player, tile.price, null, `pajak`);
   }
   else if (['chance', 'chest'].includes(tile.type)) {
     triggerChanceCard(player, tile.type);
@@ -1476,7 +1643,7 @@ function handleTileAction(player) {
     endTurnAfterDelay();
   }
   else {
-    addLog(`${player.name} mendarat di <b>${tile.name}</b>`, 'normal');
+    addLog(`${player.name} di <b>${tile.name}</b>`, 'normal');
     state.phase = 'end-turn';
     endTurnAfterDelay();
   }
@@ -1510,16 +1677,14 @@ function hasFullColorGroup(playerId, group) {
   return COLOR_GROUP_INFO[group].members.every(tid => state.propertyOwners[tid] === playerId);
 }
 
-/* ============================================================ ULTIMATE SYSTEM ============================================================ */
+/* ============================================================ ULTIMATE ============================================================ */
 function checkUltimateTrigger(player) {
   const tile = BOARD_TILES[player.pos];
   if (!tile.isUltimateTile) return false;
   const ownerId = state.propertyOwners[tile.id];
   if (ownerId === undefined || ownerId === player.id) return false;
   if (state.ultimate.active) return false;
-
   addLog(`👑 ${player.name} menginjak <b>${tile.name}</b>! Ultimate terpicu!`, 'ultimate');
-  // Pilih random ultimate
   const ultKeys = ['rongawi', 'storm', 'tax', 'fury'];
   const chosen = ultKeys[Math.floor(Math.random() * ultKeys.length)];
   activateUltimate(ownerId, chosen);
@@ -1530,11 +1695,9 @@ function activateUltimate(ownerId, type = 'rongawi') {
   if (state.ultimate.active) return;
   const owner = PLAYERS[ownerId];
   const ult = ULTIMATE_TYPES[type];
-
-  addLog(`${ult.icon} <b>${ult.name} DIAKTIFKAN oleh ${owner.name}!</b>`, 'ultimate');
+  addLog(`${ult.icon} <b>${ult.name} oleh ${owner.name}!</b>`, 'ultimate');
   addLog(`${ult.desc} (${ult.duration} ronde)`, 'ultimate');
 
-  // Snapshot
   state.ultimate.originalOwners = JSON.parse(JSON.stringify(state.propertyOwners));
   state.ultimate.originalHouses = JSON.parse(JSON.stringify(state.propertyHouses));
   state.ultimate.originalMortgaged = JSON.parse(JSON.stringify(state.mortgaged));
@@ -1544,7 +1707,6 @@ function activateUltimate(ownerId, type = 'rongawi') {
   state.ultimate.ownerId = ownerId;
   state.ultimate.roundsLeft = ult.duration;
 
-  // Apply immediate effect (storm, fury)
   if (type === 'storm') applyStorm(ownerId);
   if (type === 'fury') applyFury(ownerId);
 
@@ -1552,11 +1714,9 @@ function activateUltimate(ownerId, type = 'rongawi') {
   showUltimateOverlay(ult, owner);
   document.getElementById('board-grid').classList.add(ult.boardClass);
 
-  // Visual tiles
   BOARD_TILES.forEach(t => {
     const el = document.getElementById(`tile-${t.id}`);
-    if (!el) return;
-    el.classList.add('tile-ultimated');
+    if (el) el.classList.add('tile-ultimated');
   });
 
   updatePlayersUI();
@@ -1566,11 +1726,10 @@ function applyStorm(ownerId) {
   const owner = PLAYERS[ownerId];
   PLAYERS.forEach(p => {
     if (p.id === ownerId || p.bankrupt) return;
-    const oldPos = p.pos;
     p.pos = Math.max(0, p.pos - 5);
-    addLog(`🌪️ ${p.name} mundur 5 langkah (${oldPos} → ${p.pos}) & bayar $50`, 'ultimate');
     p.money -= 50;
     owner.money += 50;
+    addLog(`🌪️ ${p.name} mundur 5 & bayar $50`, 'ultimate');
     renderTokensOnBoard(p.id);
   });
   updatePlayersUI();
@@ -1589,8 +1748,7 @@ function applyFury(ownerId) {
       }
     }
   });
-  addLog(`🔥 ${count} properti ${owner.name} upgrade gratis +1 rumah!`, 'ultimate');
-  updatePlayersUI();
+  addLog(`🔥 ${count} properti ${owner.name} upgrade +1 rumah!`, 'ultimate');
 }
 
 function showUltimateOverlay(ult, owner) {
@@ -1598,10 +1756,11 @@ function showUltimateOverlay(ult, owner) {
   overlay.className = 'ultimate-overlay';
   overlay.innerHTML = `
     <div class="ultimate-text">
-      <div style="font-size: 100px; animation: crownSpin 1.5s ease-out;">${ult.icon}</div>
+      <div style="font-size: clamp(60px, 20vw, 100px); animation: crownSpin 1.5s ease-out;">${ult.icon}</div>
       <div class="ultimate-title">ULTIMATE!</div>
-      <div class="ultimate-sub">${ult.name} • ${owner.name.toUpperCase()}</div>
-      <div style="margin-top: 20px; color: #fef3c7; font-size: 12px; letter-spacing: 2px; max-width: 90vw;">
+      <div class="ultimate-sub">${ult.name}</div>
+      <div class="ultimate-sub" style="margin-top: 4px; font-size: clamp(9px, 2.5vw, 12px);">${owner.name.toUpperCase()}</div>
+      <div style="margin-top: 16px; color: #fef3c7; font-size: clamp(9px, 2.5vw, 12px); letter-spacing: 1px; max-width: 90vw;">
         ${ult.desc}
       </div>
     </div>
@@ -1617,7 +1776,6 @@ function tickUltimate() {
   const ult = ULTIMATE_TYPES[state.ultimate.type];
   addLog(`${ult.icon} ${ult.name} — sisa ${state.ultimate.roundsLeft} ronde`, 'ultimate');
 
-  // Tax ultimate effect per round
   if (state.ultimate.type === 'tax') {
     const owner = PLAYERS[state.ultimate.ownerId];
     PLAYERS.forEach(p => {
@@ -1626,7 +1784,7 @@ function tickUltimate() {
         .filter(tid => state.propertyOwners[tid] === p.id)
         .reduce((sum, tid) => sum + (BOARD_TILES[tid].price || 0), 0);
       const tax = Math.floor(netWorth * 0.10);
-      addLog(`💰 ${p.name} bayar pajak 10% = <b>$${tax}</b> ke ${owner.name}`, 'ultimate');
+      addLog(`💰 ${p.name} pajak 10% = <b>$${tax}</b>`, 'ultimate');
       p.money -= tax;
       owner.money += tax;
     });
@@ -1686,7 +1844,7 @@ function attemptPayment(player, amount, creditorId, reason) {
     endTurnAfterDelay();
   } else {
     state.pendingDebt = { playerId: player.id, amount, creditorId, reason };
-    addLog(`⚠️ <b>${player.name}</b> tidak bisa bayar <b>$${amount}</b> (${reason})!`, 'tax');
+    addLog(`⚠️ ${player.name} tidak bisa bayar <b>$${amount}</b> (${reason})!`, 'tax');
     if (player.isAI) aiHandleDebt(player);
     else openDebtModal();
   }
@@ -1696,7 +1854,7 @@ function openDebtModal() {
   const debt = state.pendingDebt;
   if (!debt) return;
   const player = PLAYERS[debt.playerId];
-  document.getElementById('debt-message').innerText = `Kamu harus membayar $${debt.amount} (${debt.reason}) tapi uangmu tidak cukup!`;
+  document.getElementById('debt-message').innerText = `Bayar $${debt.amount} (${debt.reason}) — uang tidak cukup!`;
   document.getElementById('debt-current').innerText = `$${player.money}`;
   document.getElementById('debt-needed').innerText = `$${debt.amount}`;
   document.getElementById('debt-shortage').innerText = `$${debt.amount - player.money}`;
@@ -1719,7 +1877,7 @@ function declareBankruptcy() {
       else { delete state.propertyOwners[tid]; delete state.propertyHouses[tid]; delete state.mortgaged[tid]; }
     }
   });
-  addLog(`💀 <b>${player.name}</b> BANGKRUT!`, 'tax');
+  addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
   state.pendingDebt = null;
   closeModal('modal-debt');
   closeModal('modal-manage');
@@ -1735,7 +1893,7 @@ function checkDebtResolved() {
   if (player.money >= debt.amount) {
     player.money -= debt.amount;
     if (debt.creditorId !== null) PLAYERS[debt.creditorId].money += debt.amount;
-    addLog(`✅ ${player.name} berhasil bayar <b>$${debt.amount}</b>`, 'buy');
+    addLog(`✅ ${player.name} bayar <b>$${debt.amount}</b>`, 'buy');
     playSound('cash');
     showFloatingMoney(player, `-$${debt.amount}`);
     state.pendingDebt = null;
@@ -1746,7 +1904,7 @@ function checkDebtResolved() {
   }
 }
 
-/* ============================================================ MANAGE MODAL ============================================================ */
+/* ============================================================ MANAGE ============================================================ */
 function openManageModal() {
   const modal = document.getElementById('modal-manage');
   const player = PLAYERS[0];
@@ -1754,7 +1912,7 @@ function openManageModal() {
 
   document.getElementById('modal-manage-header').innerHTML = `
     <div class="flex items-center justify-between">
-      <span>⚙️ KELOLA PROPERTI</span>
+      <span>⚙️ KELOLA</span>
       <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">💰 $${player.money}</span>
     </div>
   `;
@@ -1769,7 +1927,7 @@ function openManageModal() {
     content.innerHTML = `
       <p class="text-xs text-slate-400 text-center mb-3">${owned.length} properti</p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 place-items-center">
-        ${owned.map(t => `<div>${renderPropertyCard(t, { showActions: true, actionContext: 'manage', player })}</div>`).join('')}
+        ${owned.map(t => `<div class="w-full">${renderPropertyCard(t, { showActions: true, actionContext: 'manage', player })}</div>`).join('')}
       </div>
     `;
   }
@@ -1778,12 +1936,12 @@ function openManageModal() {
   setTimeout(() => modal.querySelector('.modal-anim').classList.remove('scale-95', 'opacity-0'), 20);
 }
 
-/* ============================================================ BUILD/SELL/MORTGAGE ============================================================ */
+/* ============================================================ BUILD/SELL ============================================================ */
 function canBuildHouse(player, tile) {
   if (tile.type !== 'property') return false;
   if (state.mortgaged[tile.id]) return false;
   const houses = state.propertyHouses[tile.id] || 0;
-  if (houses >= 4) return false;  // hanya sampai 4 rumah, lalu upgrade hotel
+  if (houses >= 4) return false;
   if (!hasFullColorGroup(player.id, tile.group)) return false;
   if (player.money < tile.houseCost) return false;
   const members = COLOR_GROUP_INFO[tile.group].members;
@@ -1795,13 +1953,10 @@ function canUpgradeToHotel(player, tile) {
   if (tile.type !== 'property') return false;
   if (state.mortgaged[tile.id]) return false;
   const houses = state.propertyHouses[tile.id] || 0;
-  if (houses !== 5) {
-    // Cek kalau mau upgrade dari 4 rumah: butuh SEMUA member di group punya >= 4 rumah
-    if (houses !== 4) return false;
-    const members = COLOR_GROUP_INFO[tile.group].members;
-    const allMin4 = members.every(tid => (state.propertyHouses[tid] || 0) >= 4);
-    if (!allMin4) return false;
-  } else return false;
+  if (houses !== 4) return false;
+  const members = COLOR_GROUP_INFO[tile.group].members;
+  const allMin4 = members.every(tid => (state.propertyHouses[tid] || 0) >= 4);
+  if (!allMin4) return false;
   if (!hasFullColorGroup(player.id, tile.group)) return false;
   if (player.money < tile.houseCost) return false;
   return true;
@@ -1819,12 +1974,11 @@ function doBuildHouse(playerId, tileId) {
   const player = PLAYERS[playerId];
   const tile = BOARD_TILES[tileId];
   if (!canBuildHouse(player, tile)) return;
-  const houses = (state.propertyHouses[tileId] || 0) + 1;
-  state.propertyHouses[tileId] = houses;
+  state.propertyHouses[tileId] = (state.propertyHouses[tileId] || 0) + 1;
   player.money -= tile.houseCost;
   playSound('build');
   showFloatingMoney(player, `-$${tile.houseCost}`);
-  addLog(`🏠 ${player.name} bangun rumah ${houses}/4 di <b>${tile.name}</b>`, 'buy');
+  addLog(`🏠 ${player.name} bangun rumah ${state.propertyHouses[tileId]}/4 di ${tile.name}`, 'buy');
   updateTileHouses(tileId);
   updatePlayersUI();
   checkDebtResolved();
@@ -1839,7 +1993,7 @@ function doUpgradeHotel(playerId, tileId) {
   player.money -= tile.houseCost;
   playSound('build');
   showFloatingMoney(player, `-$${tile.houseCost}`);
-  addLog(`🏨 ${player.name} upgrade <b>HOTEL</b> di <b>${tile.name}</b>! Sewa jadi $${tile.rent[5]}!`, 'buy');
+  addLog(`🏨 ${player.name} upgrade HOTEL di ${tile.name}! Sewa $${tile.rent[5]}!`, 'buy');
   updateTileHouses(tileId);
   updatePlayersUI();
   checkDebtResolved();
@@ -1856,7 +2010,7 @@ function doSellHouse(playerId, tileId) {
   player.money += refund;
   playSound('sell');
   showFloatingMoney(player, `+$${refund}`);
-  addLog(`💸 ${player.name} jual ${houses === 5 ? 'HOTEL' : 'rumah'} di <b>${tile.name}</b> (+$${refund})`, 'buy');
+  addLog(`💸 ${player.name} jual ${houses === 5 ? 'HOTEL' : 'rumah'} di ${tile.name}`, 'buy');
   updateTileHouses(tileId);
   updatePlayersUI();
   checkDebtResolved();
@@ -1866,13 +2020,12 @@ function doSellHouse(playerId, tileId) {
 function doMortgage(playerId, tileId) {
   const player = PLAYERS[playerId];
   const tile = BOARD_TILES[tileId];
-  const houses = state.propertyHouses[tileId] || 0;
-  if (houses > 0) return;
+  if ((state.propertyHouses[tileId] || 0) > 0) return;
   state.mortgaged[tileId] = true;
   player.money += Math.floor(tile.price / 2);
   playSound('cash');
   showFloatingMoney(player, `+$${Math.floor(tile.price / 2)}`);
-  addLog(`🔒 ${player.name} mortgage <b>${tile.name}</b>`, 'buy');
+  addLog(`🔒 ${player.name} mortgage ${tile.name}`, 'buy');
   const el = document.getElementById(`tile-${tileId}`);
   if (el) el.classList.add('tile-mortgaged');
   updatePlayersUI();
@@ -1889,7 +2042,7 @@ function doUnmortgage(playerId, tileId) {
   player.money -= cost;
   playSound('cash');
   showFloatingMoney(player, `-$${cost}`);
-  addLog(`🔓 ${player.name} tebus <b>${tile.name}</b>`, 'buy');
+  addLog(`🔓 ${player.name} tebus ${tile.name}`, 'buy');
   const el = document.getElementById(`tile-${tileId}`);
   if (el) el.classList.remove('tile-mortgaged');
   updatePlayersUI();
@@ -1900,8 +2053,7 @@ function doUnmortgage(playerId, tileId) {
 function doSellLand(playerId, tileId) {
   const player = PLAYERS[playerId];
   const tile = BOARD_TILES[tileId];
-  const houses = state.propertyHouses[tileId] || 0;
-  if (houses > 0) return;
+  if ((state.propertyHouses[tileId] || 0) > 0) return;
   if (state.propertyOwners[tileId] !== playerId) return;
   const refund = Math.floor(tile.price / 2);
   player.money += refund;
@@ -1910,7 +2062,7 @@ function doSellLand(playerId, tileId) {
   delete state.mortgaged[tileId];
   playSound('sell');
   showFloatingMoney(player, `+$${refund}`);
-  addLog(`🏚️ ${player.name} jual <b>${tile.name}</b> ke bank (+$${refund})`, 'buy');
+  addLog(`🏚️ ${player.name} jual ${tile.name} ke bank`, 'buy');
 
   const el = document.getElementById(`tile-${tileId}`);
   if (el) {
@@ -1935,12 +2087,14 @@ function updateTileHouses(tileId) {
     const h = document.createElement('span');
     h.className = 'hotel-icon';
     h.innerText = '🏨';
+    h.style.fontSize = 'clamp(6px, 1.8vw, 10px)';
     el.appendChild(h);
   } else if (houses > 0) {
     for (let i = 0; i < houses; i++) {
       const h = document.createElement('span');
       h.className = 'house-icon';
       h.innerText = '🏠';
+      h.style.fontSize = 'clamp(5px, 1.5vw, 8px)';
       el.appendChild(h);
     }
   }
@@ -1956,14 +2110,14 @@ function aiDecideBuy(player, tile) {
       playSound('buy');
       showFloatingMoney(player, `-$${tile.price}`);
       markTileOwner(tile.id, player.id);
-      addLog(`🤖 ${player.name} membeli <b>${tile.name}</b>`, 'buy');
+      addLog(`🤖 AI beli <b>${tile.name}</b>`, 'buy');
       updatePlayersUI();
       state.phase = 'end-turn';
       endTurnAfterDelay();
     }, 700);
   } else {
     setTimeout(() => {
-      addLog(`🤖 ${player.name} lewati <b>${tile.name}</b>`, 'normal');
+      addLog(`🤖 AI lewati ${tile.name}`, 'normal');
       state.phase = 'end-turn';
       endTurnAfterDelay();
     }, 500);
@@ -1974,7 +2128,6 @@ function aiHandleDebt(player) {
   const debt = state.pendingDebt;
   const target = debt.amount;
   setTimeout(() => {
-    // Jual rumah
     let safety = 0;
     while (player.money < target && safety < 100) {
       safety++;
@@ -1993,7 +2146,6 @@ function aiHandleDebt(player) {
       }
       if (!sold) break;
     }
-    // Mortgage
     safety = 0;
     while (player.money < target && safety < 100) {
       safety++;
@@ -2009,7 +2161,6 @@ function aiHandleDebt(player) {
       const el = document.getElementById(`tile-${tile.id}`);
       if (el) el.classList.add('tile-mortgaged');
     }
-    // Sell land
     safety = 0;
     while (player.money < target && safety < 100) {
       safety++;
@@ -2034,7 +2185,7 @@ function aiHandleDebt(player) {
     if (player.money >= target) {
       player.money -= target;
       if (debt.creditorId !== null) PLAYERS[debt.creditorId].money += target;
-      addLog(`🤖 ${player.name} bayar <b>$${target}</b>`, 'buy');
+      addLog(`🤖 AI bayar $${target}`, 'buy');
       state.pendingDebt = null;
       state.phase = 'end-turn';
       endTurnAfterDelay();
@@ -2046,7 +2197,7 @@ function aiHandleDebt(player) {
           else { delete state.propertyOwners[tid]; delete state.propertyHouses[tid]; delete state.mortgaged[tid]; }
         }
       });
-      addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
+      addLog(`💀 AI BANGKRUT!`, 'tax');
       state.pendingDebt = null;
       updatePlayersUI();
       const active = PLAYERS.filter(p => !p.bankrupt);
@@ -2076,7 +2227,7 @@ function aiTryBuildHouses() {
   else doBuildHouse(player.id, tile.id);
 }
 
-/* ============================================================ BUY MODAL ============================================================ */
+/* ============================================================ BUY ============================================================ */
 function openBuyModal(tile) {
   const modal = document.getElementById('modal-property');
   const player = PLAYERS[state.currentTurnIndex];
@@ -2097,10 +2248,8 @@ function confirmBuyProperty() {
     playSound('buy');
     showFloatingMoney(player, `-$${tile.price}`);
     markTileOwner(tile.id, player.id);
-    addLog(`✅ ${player.name} membeli <b>${tile.name}</b>`, 'buy');
-  } else {
-    addLog(`❌ ${player.name} tidak cukup uang!`, 'tax');
-  }
+    addLog(`✅ ${player.name} beli <b>${tile.name}</b>`, 'buy');
+  } else addLog(`❌ Uang tidak cukup!`, 'tax');
   closeModal('modal-property');
   updatePlayersUI();
   state.phase = 'end-turn';
@@ -2110,7 +2259,7 @@ function confirmBuyProperty() {
 function declineBuyProperty() {
   closeModal('modal-property');
   state.landedTileForBuy = null;
-  addLog(`${PLAYERS[state.currentTurnIndex].name} melewati pembelian.`, 'normal');
+  addLog(`${PLAYERS[state.currentTurnIndex].name} lewati pembelian.`, 'normal');
   state.phase = 'end-turn';
   endTurnAfterDelay();
 }
@@ -2124,40 +2273,40 @@ function markTileOwner(tileId, playerId) {
   tileEl.classList.add('tile-owned');
   const badge = document.getElementById(`owner-badge-${tileId}`);
   if (badge) {
-    badge.className = `absolute top-0.5 right-0.5 w-2 h-2 rounded-full ${player.color} shadow-sm border border-white/40`;
+    badge.className = `absolute top-0 right-0 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${player.color} shadow-sm border border-white/40`;
     badge.style.display = 'block';
   }
 }
 
-/* ============================================================ CHANCE / COMMUNITY ============================================================ */
+/* ============================================================ CARD ============================================================ */
 function triggerChanceCard(player, type) {
   const chanceCards = [
-    { text: '🚨 Denda tilang kecepatan! Bayar $50.', amount: -50 },
+    { text: '🚨 Denda tilang! Bayar $50.', amount: -50 },
     { text: '🏥 Biaya rumah sakit! Bayar $100.', amount: -100 },
     { text: '🎁 Bank memberi dividen! Terima $150.', amount: 150 },
     { text: '💼 Proyek sukses! Terima $200.', amount: 200 },
-    { text: '🚔 Kamu tertangkap polisi! Masuk penjara!', jail: true },
-    { text: '🎴 Kamu dapat kartu BEBAS PENJARA!', getOut: true },
-    { text: '🎴 KARTU CANCEL ULTIMATE! Batalkan Ultimate aktif!', cancelUltimate: true },
-    { text: '🚂 Kartu KERETA TEMBUS! Warp ke lokasi mana saja.', trainToken: true },
-    { text: '👑 Dewa Rongawi memanggil! Ultimate terpicu!', triggerUltimate: true }
-  ];
-  const communityCards = [
-    { text: '💊 Biaya dokter! Bayar $50.', amount: -50 },
-    { text: '🎓 Biaya sekolah anak! Bayar $80.', amount: -80 },
-    { text: '💰 Warisan dari kakek! Terima $200.', amount: 200 },
-    { text: '🎉 Menang lotre! Terima $100.', amount: 100 },
-    { text: '🚔 Melanggar hukum! Masuk penjara!', jail: true },
+    { text: '🚔 Masuk penjara!', jail: true },
     { text: '🎴 Kartu BEBAS PENJARA!', getOut: true },
     { text: '🎴 KARTU CANCEL ULTIMATE!', cancelUltimate: true },
     { text: '🚂 Kartu KERETA TEMBUS!', trainToken: true },
-    { text: '👑 Dewa Rongawi memanggil! Ultimate terpicu!', triggerUltimate: true }
+    { text: '👑 Ultimate terpicu!', triggerUltimate: true }
+  ];
+  const communityCards = [
+    { text: '💊 Biaya dokter! Bayar $50.', amount: -50 },
+    { text: '🎓 Biaya sekolah! Bayar $80.', amount: -80 },
+    { text: '💰 Warisan! Terima $200.', amount: 200 },
+    { text: '🎉 Menang lotre! Terima $100.', amount: 100 },
+    { text: '🚔 Masuk penjara!', jail: true },
+    { text: '🎴 Kartu BEBAS PENJARA!', getOut: true },
+    { text: '🎴 KARTU CANCEL ULTIMATE!', cancelUltimate: true },
+    { text: '🚂 Kartu KERETA TEMBUS!', trainToken: true },
+    { text: '👑 Ultimate terpicu!', triggerUltimate: true }
   ];
   const cards = type === 'chance' ? chanceCards : communityCards;
   const card = cards[Math.floor(Math.random() * cards.length)];
   playSound('card');
 
-  document.getElementById('card-title').innerText = type === 'chance' ? 'KARTU KESEMPATAN' : 'DANA UMUM';
+  document.getElementById('card-title').innerText = type === 'chance' ? 'KESEMPATAN' : 'DANA UMUM';
   document.getElementById('card-message').innerText = card.text;
 
   let badgeIcon = type === 'chance' ? '❓' : '📦';
@@ -2185,29 +2334,29 @@ function triggerChanceCard(player, type) {
   if (card.jail) {
     playSound('jail');
     sendToJail(player);
-    addLog(`${player.name}: <i>"${card.text}"</i>`, 'jail');
+    addLog(`${player.name}: ${card.text}`, 'jail');
     if (player.isAI) setTimeout(finish, 1600);
     else continueBtn.onclick = finish;
   }
   else if (card.getOut) {
     player.hand.push({ type: 'jail', name: 'Bebas Penjara', desc: 'Keluar penjara gratis', icon: '🎴' });
     player.getOutCard++;
-    addLog(`🎴 ${player.name} simpan <b>Kartu Bebas Penjara</b>`, 'card');
+    addLog(`🎴 ${player.name} simpan Kartu Bebas Penjara`, 'card');
     updateCardHandUI();
     if (player.isAI) setTimeout(finish, 1600);
     else continueBtn.onclick = finish;
   }
   else if (card.cancelUltimate) {
-    player.hand.push({ type: 'cancel', name: 'Cancel Ultimate', desc: 'Batalkan Ultimate aktif', icon: '🚫' });
-    addLog(`🎴 ${player.name} simpan <b>Kartu Cancel Ultimate</b>`, 'card');
+    player.hand.push({ type: 'cancel', name: 'Cancel Ultimate', desc: 'Batalkan Ultimate', icon: '🚫' });
+    addLog(`🎴 ${player.name} simpan Cancel Ultimate`, 'card');
     updateCardHandUI();
     if (player.isAI) setTimeout(finish, 1600);
     else continueBtn.onclick = finish;
   }
   else if (card.trainToken) {
-    player.hand.push({ type: 'train', name: 'Kereta Tembus', desc: 'Warp ke lokasi mana saja', icon: '🚂' });
+    player.hand.push({ type: 'train', name: 'Kereta Tembus', desc: 'Warp ke lokasi', icon: '🚂' });
     state.trainTokens[player.id] = (state.trainTokens[player.id] || 0) + 1;
-    addLog(`🚂 ${player.name} dapat <b>Kereta Tembus</b>!`, 'train');
+    addLog(`🚂 ${player.name} dapat Kereta Tembus!`, 'train');
     updateCardHandUI();
     updateTrainButtonUI();
     if (player.isAI) setTimeout(finish, 1600);
@@ -2221,9 +2370,7 @@ function triggerChanceCard(player, type) {
       const chosen = ultKeys[Math.floor(Math.random() * ultKeys.length)];
       addLog(`👑 Kartu memicu Ultimate!`, 'ultimate');
       activateUltimate(ownerId, chosen);
-    } else {
-      addLog(`👑 Tidak ada Ultimate yang bisa dipicu.`, 'ultimate');
-    }
+    } else addLog(`👑 Tidak ada Ultimate.`, 'ultimate');
     if (player.isAI) setTimeout(finish, 2000);
     else continueBtn.onclick = finish;
   }
@@ -2231,12 +2378,12 @@ function triggerChanceCard(player, type) {
     player.money += card.amount;
     playSound('cash');
     showFloatingMoney(player, `+$${card.amount}`);
-    addLog(`${player.name}: <i>"${card.text}"</i>`, 'buy');
+    addLog(`${player.name}: ${card.text}`, 'buy');
     if (player.isAI) setTimeout(finish, 1600);
     else continueBtn.onclick = finish;
   }
   else {
-    addLog(`${player.name}: <i>"${card.text}"</i>`, 'tax');
+    addLog(`${player.name}: ${card.text}`, 'tax');
     if (player.isAI) setTimeout(() => closeModal('modal-card'), 1200);
     else continueBtn.onclick = () => closeModal('modal-card');
     setTimeout(() => { attemptPayment(player, -card.amount, null, 'kartu'); }, player.isAI ? 1600 : 0);
@@ -2252,14 +2399,14 @@ function useCard(idx) {
 
   if (card.type === 'jail') {
     if (!player.inJail) {
-      document.getElementById('action-banner').innerHTML = `❌ Kartu Bebas Penjara cuma bisa dipakai saat di penjara.`;
+      document.getElementById('action-banner').innerHTML = `❌ Bebas Penjara hanya saat di penjara.`;
       return;
     }
     player.inJail = false;
     player.jailTurns = 0;
     player.hand.splice(idx, 1);
     player.getOutCard--;
-    addLog(`🎴 ${player.name} pakai <b>Kartu Bebas Penjara</b>!`, 'card');
+    addLog(`🎴 ${player.name} pakai Kartu Bebas Penjara!`, 'card');
     updateCardHandUI();
     updatePlayersUI();
     state.phase = 'waiting-roll';
@@ -2283,10 +2430,7 @@ function useCard(idx) {
     return;
   }
 
-  if (card.type === 'train') {
-    openTrainModal();
-    return;
-  }
+  if (card.type === 'train') openTrainModal();
 }
 
 function activateCancelUltimate() {
@@ -2294,7 +2438,7 @@ function activateCancelUltimate() {
   const player = PLAYERS[0];
   if (idx === undefined || !player.hand[idx]) return;
   player.hand.splice(idx, 1);
-  addLog(`🚫👑 ${player.name} pakai <b>Kartu Cancel Ultimate</b>!`, 'ultimate');
+  addLog(`🚫👑 ${player.name} pakai Cancel Ultimate!`, 'ultimate');
   playSound('card');
   deactivateUltimate();
   updateCardHandUI();
@@ -2307,7 +2451,7 @@ function openTrainModal() {
   const player = PLAYERS[state.currentTurnIndex];
   const tokens = state.trainTokens[player.id] || 0;
   if (tokens <= 0) {
-    document.getElementById('action-banner').innerHTML = `❌ Tidak ada token Kereta Tembus.`;
+    document.getElementById('action-banner').innerHTML = `❌ Tidak ada token Kereta.`;
     return;
   }
 
@@ -2318,9 +2462,9 @@ function openTrainModal() {
     const el = document.createElement('div');
     el.className = 'train-tile';
     el.innerHTML = `
-      <div style="font-size: 18px;">${tile.icon || (tile.type === 'property' ? '🏙️' : '📍')}</div>
-      <div style="margin-top: 4px; font-size: 10px;">${tile.name}</div>
-      <div style="font-size: 9px; color: #94a3b8;">#${tile.id}</div>
+      <div style="font-size: clamp(16px, 4vw, 20px);">${tile.icon || (tile.type === 'property' ? '🏙️' : '📍')}</div>
+      <div style="margin-top: 3px; font-size: clamp(8px, 2vw, 10px); line-height: 1.2;">${tile.name}</div>
+      <div style="font-size: clamp(7px, 1.8vw, 9px); color: #94a3b8;">#${tile.id}</div>
     `;
     el.onclick = () => useTrainTo(tile.id);
     grid.appendChild(el);
@@ -2341,7 +2485,7 @@ function useTrainTo(tileId) {
   if (cardIdx >= 0) player.hand.splice(cardIdx, 1);
 
   playSound('train');
-  addLog(`🚂💨 ${player.name} pakai <b>Kereta Tembus</b> ke <b>${BOARD_TILES[tileId].name}</b>!`, 'train');
+  addLog(`🚂💨 ${player.name} Kereta ke <b>${BOARD_TILES[tileId].name}</b>!`, 'train');
 
   player.pos = tileId;
   renderTokensOnBoard(player.id);
@@ -2361,12 +2505,10 @@ function useTrainTo(tileId) {
     state.currentDiceTotal = 7;
     if (BOARD_TILES[tileId].type === 'go') {
       player.money += 200;
-      addLog(`${player.name} mendarat di MULAI: +$200`, 'buy');
+      addLog(`${player.name} di MULAI: +$200`, 'buy');
       state.phase = 'end-turn';
       endTurnAfterDelay();
-    } else {
-      handleTileAction(player);
-    }
+    } else handleTileAction(player);
   }, 600);
 }
 
@@ -2420,7 +2562,7 @@ function useJailCardAi(player, idx) {
   player.getOutCard--;
   player.inJail = false;
   player.jailTurns = 0;
-  addLog(`🤖 ${player.name} pakai Kartu Bebas Penjara!`, 'jail');
+  addLog(`🤖 AI pakai Kartu Bebas Penjara!`, 'jail');
   updatePlayersUI();
   updateCardHandUI();
   state.phase = 'waiting-roll';
@@ -2456,14 +2598,14 @@ function rollForDoubles() {
     player.inJail = false;
     player.jailTurns = 0;
     state.currentDiceTotal = val1 + val2;
-    addLog(`🎲 ${player.name} DOUBLE (${val1}+${val2})! Bebas!`, 'jail');
+    addLog(`🎲 ${player.name} DOUBLE! Bebas!`, 'jail');
     updatePlayersUI();
     setTimeout(() => animateMoveToken(player, val1 + val2, () => handleTileAction(player)), 600);
   } else {
     player.jailTurns++;
     state.jailAttempts = player.jailTurns;
     document.getElementById('jail-attempts').innerText = state.jailAttempts;
-    addLog(`🎲 ${player.name} gagal double. Tetap di penjara (${player.jailTurns}/3).`, 'jail');
+    addLog(`🎲 ${player.name} gagal double (${player.jailTurns}/3)`, 'jail');
     if (player.jailTurns >= 3) {
       addLog(`⏰ ${player.name} wajib bayar $50!`, 'jail');
       if (player.money >= 50) {
@@ -2495,7 +2637,7 @@ function rollForDoubles() {
 
 function handleJailRoll(player, val1, val2, total) { rollForDoubles(); }
 
-/* ============================================================ CLOSE ============================================================ */
+/* ============================================================ MODAL ============================================================ */
 function closeModal(id) {
   const m = document.getElementById(id);
   if (!m) return;
@@ -2520,7 +2662,7 @@ function endTurnAfterDelay() {
   }
   if (player.money < 0 && !state.pendingDebt) {
     player.bankrupt = true;
-    addLog(`💀 <b>${player.name}</b> BANGKRUT!`, 'tax');
+    addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
   }
   const active = PLAYERS.filter(p => !p.bankrupt);
   if (active.length === 1) { setTimeout(() => triggerWinner(active[0]), 400); return; }
@@ -2539,7 +2681,7 @@ function handleEndTurn() {
 
   if (player.money < 0 && !state.pendingDebt) {
     player.bankrupt = true;
-    addLog(`💀 <b>${player.name}</b> BANGKRUT!`, 'tax');
+    addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
   }
 
   const active = PLAYERS.filter(p => !p.bankrupt);
@@ -2547,7 +2689,6 @@ function handleEndTurn() {
 
   state.doublesCount = 0;
 
-  // Ultimate tick di ronde penuh
   do {
     state.currentTurnIndex = (state.currentTurnIndex + 1) % PLAYERS.length;
     if (state.currentTurnIndex === 0) {
@@ -2562,8 +2703,7 @@ function handleEndTurn() {
   state.phase = 'waiting-roll';
 
   const currP = PLAYERS[state.currentTurnIndex];
-  document.getElementById('action-banner').innerHTML =
-    `Giliran <span class="font-bold text-amber-400">${currP.name}</span>. ${currP.isAI ? 'AI sedang berpikir...' : 'Klik Kocok Dadu!'}`;
+  document.getElementById('action-banner').innerHTML = `Giliran <b>${currP.name}</b>`;
 
   renderTokensOnBoard();
   updatePlayersUI();
@@ -2573,15 +2713,14 @@ function handleEndTurn() {
   if (currP.isAI) {
     state.isAITurn = true;
     document.getElementById('btn-roll-dice').disabled = true;
-    document.getElementById('roll-btn-label').innerText = 'AI Berpikir...';
+    document.getElementById('roll-btn-label').innerText = 'AI mikir...';
 
-    // AI check kereta dulu?
     const aiTokens = state.trainTokens[currP.id] || 0;
     const aiShouldUseTrain = aiTokens > 0 && Math.random() < 0.4;
 
     if (currP.inJail) {
       setTimeout(() => {
-        document.getElementById('roll-btn-label').innerText = 'Kocok Dadu (Space)';
+        document.getElementById('roll-btn-label').innerText = 'Kocok Dadu';
         state.isAITurn = false;
         const jailIdx = currP.hand.findIndex(c => c.type === 'jail');
         if (jailIdx >= 0) useJailCardAi(currP, jailIdx);
@@ -2592,13 +2731,12 @@ function handleEndTurn() {
     }
 
     setTimeout(() => {
-      document.getElementById('roll-btn-label').innerText = 'Kocok Dadu (Space)';
+      document.getElementById('roll-btn-label').innerText = 'Kocok Dadu';
       state.isAITurn = false;
       if (aiShouldUseTrain) {
-        // AI pakai kereta ke tile paling strategis
         const targetTile = pickAITrainTarget(currP);
         if (targetTile !== null) {
-          addLog(`🤖 AI mempertimbangkan Kereta Tembus...`, 'train');
+          addLog(`🤖 AI pakai Kereta Tembus!`, 'train');
           useTrainTo(targetTile);
           return;
         }
@@ -2606,7 +2744,7 @@ function handleEndTurn() {
       handleRollDice();
     }, 900 + Math.random() * 600);
   } else {
-    document.getElementById('roll-btn-label').innerText = 'Kocok Dadu (Space)';
+    document.getElementById('roll-btn-label').innerText = 'Kocok Dadu';
     if (currP.inJail) {
       const modal = document.getElementById('modal-jail');
       document.getElementById('jail-attempts').innerText = currP.jailTurns;
@@ -2623,7 +2761,6 @@ function handleEndTurn() {
 }
 
 function pickAITrainTarget(player) {
-  // Prioritas: tile unowned dekat dengan group yang AI sudah punya
   const candidates = BOARD_TILES.filter(t => {
     if (t.type !== 'property' && t.type !== 'railroad' && t.type !== 'utility') return false;
     if (state.propertyOwners[t.id] !== undefined) return false;
@@ -2656,12 +2793,12 @@ function startConfetti() {
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  const particles = Array.from({ length: 120 }).map(() => ({
+  const particles = Array.from({ length: 80 }).map(() => ({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height - canvas.height,
     color: ['#f59e0b','#3b82f6','#10b981','#ec4899','#8b5cf6','#facc15'][Math.floor(Math.random()*6)],
-    size: Math.random() * 8 + 4,
-    speed: Math.random() * 4 + 2,
+    size: Math.random() * 6 + 3,
+    speed: Math.random() * 3 + 1.5,
     rot: Math.random() * Math.PI * 2,
     vr: (Math.random() - 0.5) * 0.2
   }));
@@ -2718,7 +2855,7 @@ function resetGame() {
   document.getElementById('round-counter').innerText = '1';
   document.getElementById('btn-end-turn').disabled = true;
   document.getElementById('btn-roll-dice').disabled = false;
-  document.getElementById('action-banner').innerHTML = `Game di-reset. Giliran <span class="font-bold text-amber-400">Kamu</span>!`;
+  document.getElementById('action-banner').innerHTML = `Game di-reset. Giliran <b>Kamu</b>!`;
   document.getElementById('dice-total-text').innerText = '—';
   setInitialDice();
   updatePlayersUI();
@@ -2728,9 +2865,9 @@ function resetGame() {
   addLog('🔄 Game di-reset.', 'system');
 }
 
-/* ============================================================ KEYBOARD ============================================================ */
+/* ============================================================ KEYBOARD (desktop only) ============================================================ */
 window.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
+  if (e.code === 'Space' && window.innerWidth >= 1024) {
     e.preventDefault();
     const btn = document.getElementById('btn-roll-dice');
     if (!btn.disabled && !state.isAITurn && !state.pendingDebt) handleRollDice();
