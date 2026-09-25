@@ -410,6 +410,45 @@
   @media (hover: hover) {
     .train-tile:hover { background: rgba(139, 92, 246, 0.3); border-color: #8b5cf6; transform: scale(1.05); box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); }
   }
+
+  /* ===== NEW: Ultimate animation effects ===== */
+  @keyframes ultimateFall {
+    0% {
+      opacity: 0;
+      transform: translateY(0) rotate(0deg) scale(0.5);
+    }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% {
+      opacity: 0;
+      transform: translateY(105vh) rotate(720deg) scale(1.2);
+    }
+  }
+
+  @keyframes ultimateFlash {
+    0%   { opacity: 0; }
+    30%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes ultimateShake {
+    0%, 100% { transform: translate(0, 0); }
+    10%      { transform: translate(-6px, 4px); }
+    20%      { transform: translate(6px, -4px); }
+    30%      { transform: translate(-4px, -4px); }
+    40%      { transform: translate(4px, 4px); }
+    50%      { transform: translate(-3px, 2px); }
+    60%      { transform: translate(3px, -2px); }
+    70%      { transform: translate(-2px, 1px); }
+    80%      { transform: translate(2px, -1px); }
+    90%      { transform: translate(-1px, 0); }
+  }
+
+  @keyframes crownSpin {
+    0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
+    50%  { transform: scale(1.5) rotate(20deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
 </style>
 </head>
 <body>
@@ -1435,6 +1474,7 @@ function activateUltimate(ownerId, type = 'rongawi') {
 
   playSound('ultimate');
   showUltimateOverlay(ult, owner);
+  spawnUltimateParticles(ult);
   document.getElementById('board-grid').classList.add(ult.boardClass);
 
   BOARD_TILES.forEach(t => {
@@ -1442,7 +1482,47 @@ function activateUltimate(ownerId, type = 'rongawi') {
     if (el) el.classList.add('tile-ultimated');
   });
 
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+
   updatePlayersUI();
+}
+
+function spawnUltimateParticles(ult) {
+  const container = document.createElement('div');
+  container.style.cssText = `
+    position: fixed; inset: 0; pointer-events: none; z-index: 10000;
+    overflow: hidden;
+  `;
+  document.body.appendChild(container);
+
+  const colors = ['#fbbf24', '#f59e0b', '#fef3c7', '#fde68a', '#facc15'];
+  const count = 60;
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    const size = Math.random() * 8 + 4;
+    const x = Math.random() * 100;
+    const delay = Math.random() * 1.5;
+    const duration = 2 + Math.random() * 2;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const char = Math.random() < 0.3 ? ult.icon : (Math.random() < 0.5 ? '✨' : '⭐');
+
+    p.style.cssText = `
+      position: absolute;
+      left: ${x}%;
+      top: -30px;
+      font-size: ${size + 10}px;
+      color: ${color};
+      text-shadow: 0 0 8px ${color}, 0 0 16px ${color};
+      animation: ultimateFall ${duration}s cubic-bezier(0.4, 0, 0.6, 1) ${delay}s forwards;
+      opacity: 0;
+      will-change: transform, opacity;
+    `;
+    p.innerText = char;
+    container.appendChild(p);
+  }
+
+  setTimeout(() => container.remove(), 5000);
 }
 
 function applyStorm(ownerId) {
@@ -1490,6 +1570,21 @@ function showUltimateOverlay(ult, owner) {
     </div>
   `;
   document.body.appendChild(overlay);
+
+  // Flash putih
+  const flash = document.createElement('div');
+  flash.style.cssText = `
+    position: fixed; inset: 0; z-index: 10001; pointer-events: none;
+    background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(251,191,36,0.6), transparent 70%);
+    animation: ultimateFlash 0.6s ease-out;
+  `;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
+
+  // Screen shake
+  document.body.style.animation = 'ultimateShake 0.6s ease-out';
+  setTimeout(() => { document.body.style.animation = ''; }, 600);
+
   setTimeout(() => overlay.classList.add('fade-out'), 2500);
   setTimeout(() => overlay.remove(), 3400);
 }
@@ -2123,14 +2218,39 @@ function triggerChanceCard(player, type) {
     const rongawiTile = BOARD_TILES.find(t => t.isUltimateTile);
     const rawOwner = state.propertyOwners[rongawiTile.id];
     const ownerId = rawOwner !== undefined ? Number(rawOwner) : undefined;
-    if (ownerId !== undefined && !state.ultimate.active) {
-      const ultKeys = ['rongawi', 'storm', 'tax', 'fury'];
-      const chosen = ultKeys[Math.floor(Math.random() * ultKeys.length)];
-      addLog(`👑 Kartu memicu Ultimate!`, 'ultimate');
-      activateUltimate(ownerId, chosen);
-    } else addLog(`👑 Tidak ada Ultimate.`, 'ultimate');
-    if (player.isAI) setTimeout(finish, 2000);
-    else continueBtn.onclick = finish;
+    const canTrigger = ownerId !== undefined && !state.ultimate.active;
+
+    const handleContinue = () => {
+      closeModal('modal-card');
+
+      if (canTrigger) {
+        setTimeout(() => {
+          addLog(`👑 KARTU MEMICU ULTIMATE!`, 'ultimate');
+          addLog(`👑 Dewa Rongawi memanggil kekuatan kuno...`, 'ultimate');
+          const ultKeys = ['rongawi', 'storm', 'tax', 'fury'];
+          const chosen = ultKeys[Math.floor(Math.random() * ultKeys.length)];
+          activateUltimate(ownerId, chosen);
+        }, 300);
+
+        setTimeout(() => {
+          state.phase = 'end-turn';
+          endTurnAfterDelay();
+        }, 3800);
+      } else {
+        setTimeout(() => {
+          if (ownerId === undefined) {
+            addLog(`👑 Tidak ada pemilik Kekaisaran Rongawi. Ultimate tidak terpicu.`, 'ultimate');
+          } else if (state.ultimate.active) {
+            addLog(`👑 Ultimate sudah aktif.`, 'ultimate');
+          }
+          state.phase = 'end-turn';
+          endTurnAfterDelay();
+        }, 300);
+      }
+    };
+
+    if (player.isAI) setTimeout(handleContinue, 1800);
+    else continueBtn.onclick = handleContinue;
   }
   else if (card.amount > 0) {
     player.money += card.amount;
