@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Monopoly Nusantara — Ultimate Edition</title>
+<title>Monopoli Ngawiland</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
@@ -411,7 +411,6 @@
     .train-tile:hover { background: rgba(139, 92, 246, 0.3); border-color: #8b5cf6; transform: scale(1.05); box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); }
   }
 
-  /* ===== BUILD PANEL ===== */
   .build-card {
     display: flex;
     align-items: center;
@@ -449,6 +448,35 @@
   .build-btn-red { background: #ef4444; color: white; }
   .build-btn-amber { background: #f59e0b; color: #0f172a; }
   .build-btn-blue { background: #3b82f6; color: white; }
+
+  @keyframes ultimateFall {
+    0% { opacity: 0; transform: translateY(0) rotate(0deg) scale(0.5); }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(105vh) rotate(720deg) scale(1.2); }
+  }
+  @keyframes ultimateFlash {
+    0%   { opacity: 0; }
+    30%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes ultimateShake {
+    0%, 100% { transform: translate(0, 0); }
+    10%      { transform: translate(-6px, 4px); }
+    20%      { transform: translate(6px, -4px); }
+    30%      { transform: translate(-4px, -4px); }
+    40%      { transform: translate(4px, 4px); }
+    50%      { transform: translate(-3px, 2px); }
+    60%      { transform: translate(3px, -2px); }
+    70%      { transform: translate(-2px, 1px); }
+    80%      { transform: translate(2px, -1px); }
+    90%      { transform: translate(-1px, 0); }
+  }
+  @keyframes crownSpin {
+    0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
+    50%  { transform: scale(1.5) rotate(20deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
 </style>
 </head>
 <body>
@@ -460,7 +488,7 @@
       <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-sm sm:text-xl text-white shadow-lg shadow-blue-500/30 shrink-0">M</div>
       <div class="min-w-0">
         <h1 class="text-sm sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent truncate">
-          MONOPOLY NUSANTARA
+          MONOPOLY NGAWILAND
         </h1>
         <p class="text-[10px] sm:text-xs text-slate-400 truncate">Ultimate Edition</p>
       </div>
@@ -492,7 +520,7 @@
               <div class="inline-block bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white text-xs sm:text-xl font-black px-3 sm:px-6 py-0.5 sm:py-1.5 rounded-md shadow-lg tracking-wider border border-red-400/30 uppercase transform -rotate-3">
                 MONOPOLY
               </div>
-              <p class="text-[8px] sm:text-xs text-slate-400 mt-1 font-medium tracking-wide hidden sm:block">NUSANTARA EDITION</p>
+              <p class="text-[8px] sm:text-xs text-slate-400 mt-1 font-medium tracking-wide hidden sm:block">NGAWI EDITION</p>
             </div>
 
             <div class="flex flex-col items-center justify-center gap-2 sm:gap-4 my-auto">
@@ -549,7 +577,6 @@
         </div>
       </div>
 
-      <!-- ===== NEW: BUILD & SELL PANEL ===== -->
       <div class="glass-panel p-3 sm:p-4">
         <div class="collapsible-header flex items-center justify-between mb-2 pb-2 border-b border-slate-800" onclick="toggleCollapse('build-content', this)">
           <h2 class="text-[11px] sm:text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -711,6 +738,10 @@
 </div>
 
 <script>
+/* ============================================================ FLAGS ============================================================ */
+let winnerTriggered = false;
+let confettiActive = false;
+
 /* ============================================================ COLLAPSE ============================================================ */
 function toggleCollapse(id, headerEl) {
   const el = document.getElementById(id);
@@ -961,6 +992,7 @@ function renderTokensOnBoard(hoppingPlayerId = null) {
 
 function updatePlayersUI() {
   const container = document.getElementById('players-list-container');
+  if (!container) return;
   container.innerHTML = '';
   PLAYERS.forEach((p, idx) => {
     const isActive = idx === state.currentTurnIndex;
@@ -1000,11 +1032,15 @@ function updatePlayersUI() {
   });
 
   const currP = PLAYERS[state.currentTurnIndex];
-  const badge = document.getElementById('current-turn-badge');
-  badge.innerHTML = `
-    <span class="w-2.5 h-2.5 rounded-full ${currP.color} inline-block animate-pulse"></span>
-    ${currP.name} ${currP.isAI ? '🤖' : '👤'}
-  `;
+  if (currP) {
+    const badge = document.getElementById('current-turn-badge');
+    if (badge) {
+      badge.innerHTML = `
+        <span class="w-2.5 h-2.5 rounded-full ${currP.color} inline-block animate-pulse"></span>
+        ${currP.name} ${currP.isAI ? '🤖' : '👤'}
+      `;
+    }
+  }
 
   updateActivePlayerPropertiesUI();
   updateUltimateStatusBadge();
@@ -1013,17 +1049,19 @@ function updatePlayersUI() {
 
 function updateUltimateStatusBadge() {
   const badge = document.getElementById('ultimate-status-badge');
+  if (!badge) return;
   if (state.ultimate.active) {
     badge.classList.remove('hidden');
     const owner = PLAYERS[state.ultimate.ownerId];
     const ult = ULTIMATE_TYPES[state.ultimate.type];
-    badge.innerHTML = `${ult.icon} ${owner.token} ${state.ultimate.roundsLeft}`;
+    badge.innerHTML = `${ult.icon} ${owner ? owner.token : '?'} ${state.ultimate.roundsLeft}`;
   } else badge.classList.add('hidden');
 }
 
 function updateActivePlayerPropertiesUI() {
   const currP = PLAYERS[0];
   const container = document.getElementById('active-player-properties');
+  if (!container) return;
   container.innerHTML = '';
   const owned = Object.keys(state.propertyOwners)
     .filter(tid => Number(state.propertyOwners[tid]) === Number(currP.id))
@@ -1056,14 +1094,13 @@ function updateActivePlayerPropertiesUI() {
   container.appendChild(manageBtn);
 }
 
-/* ============================================================ NEW: BUILD PANEL ============================================================ */
+/* ============================================================ BUILD PANEL ============================================================ */
 function renderBuildPanel() {
   const player = PLAYERS[0];
   const container = document.getElementById('build-panel');
   if (!container) return;
   container.innerHTML = '';
 
-  // Cari semua property milik player yang bisa dibangun
   const ownedProps = BOARD_TILES.filter(t =>
     t.type === 'property' &&
     Number(state.propertyOwners[t.id]) === Number(player.id)
@@ -1074,14 +1111,12 @@ function renderBuildPanel() {
     return;
   }
 
-  // Group by color group
   const groups = {};
   ownedProps.forEach(t => {
     if (!groups[t.group]) groups[t.group] = [];
     groups[t.group].push(t);
   });
 
-  // Render per group
   Object.keys(groups).forEach(groupKey => {
     const groupTiles = groups[groupKey];
     const groupInfo = COLOR_GROUP_INFO[groupKey];
@@ -1089,7 +1124,6 @@ function renderBuildPanel() {
       Number(state.propertyOwners[tid]) === Number(player.id)
     );
 
-    // Header group
     const groupHeader = document.createElement('div');
     groupHeader.className = 'flex items-center gap-2 px-1 pt-1 pb-1';
     groupHeader.innerHTML = `
@@ -1101,7 +1135,6 @@ function renderBuildPanel() {
     `;
     container.appendChild(groupHeader);
 
-    // Kalau belum full group → tampilkan hint
     if (!isFullGroup) {
       const hint = document.createElement('div');
       hint.className = 'text-[9px] text-slate-500 italic px-2 pb-1';
@@ -1109,7 +1142,6 @@ function renderBuildPanel() {
       container.appendChild(hint);
     }
 
-    // Render tiap tile
     groupTiles.forEach(tile => {
       const houses = state.propertyHouses[tile.id] || 0;
       const isMort = state.mortgaged[tile.id];
@@ -1117,12 +1149,10 @@ function renderBuildPanel() {
       const card = document.createElement('div');
       card.className = 'build-card';
 
-      // Color bar
       const colorBar = document.createElement('div');
       colorBar.className = 'build-color-bar';
       colorBar.style.background = GROUP_COLOR_HEX[groupKey] || '#64748b';
 
-      // Info
       const info = document.createElement('div');
       info.className = 'flex-1 min-w-0';
       info.innerHTML = `
@@ -1139,7 +1169,6 @@ function renderBuildPanel() {
         </div>
       `;
 
-      // Buttons
       const btns = document.createElement('div');
       btns.className = 'flex gap-1 flex-col';
 
@@ -1153,7 +1182,6 @@ function renderBuildPanel() {
 
       const canSell = houses > 0 && isSellAllowed(tile, groupTiles);
 
-      // Beli Rumah button
       if (houses < 4) {
         const btnHouse = document.createElement('button');
         btnHouse.className = `build-btn ${canBuildHouse ? 'build-btn-green' : ''}`;
@@ -1163,7 +1191,6 @@ function renderBuildPanel() {
         btns.appendChild(btnHouse);
       }
 
-      // Beli Hotel button (khusus saat 4 rumah + group punya semua 4 rumah)
       if (houses === 4) {
         const btnHotel = document.createElement('button');
         btnHotel.className = `build-btn ${canBuildHotel ? 'build-btn-amber' : ''}`;
@@ -1173,7 +1200,6 @@ function renderBuildPanel() {
         btns.appendChild(btnHotel);
       }
 
-      // Jual button
       if (houses > 0) {
         const btnSell = document.createElement('button');
         btnSell.className = `build-btn ${canSell ? 'build-btn-red' : ''}`;
@@ -1192,14 +1218,12 @@ function renderBuildPanel() {
   });
 }
 
-// Cek even-build: rumah harus dibangun rata. Boleh bangun kalau rumahnya paling sedikit di group.
 function isEvenBuildAllowed(tile, groupTiles) {
   const myHouses = state.propertyHouses[tile.id] || 0;
   const minHouses = Math.min(...groupTiles.map(t => state.propertyHouses[t.id] || 0));
   return myHouses === minHouses;
 }
 
-// Cek jual: cuma boleh jual kalau rumahnya paling banyak di group.
 function isSellAllowed(tile, groupTiles) {
   const myHouses = state.propertyHouses[tile.id] || 0;
   const maxHouses = Math.max(...groupTiles.map(t => state.propertyHouses[t.id] || 0));
@@ -1217,13 +1241,11 @@ function buildHouseAction(playerId, tileId) {
   const houses = state.propertyHouses[tileId] || 0;
   if (houses >= 4) return;
 
-  // Even build check
   if (!isEvenBuildAllowed(tile, groupTiles)) {
     document.getElementById('action-banner').innerHTML = `❌ Harus bangun rata di semua properti group ini!`;
     return;
   }
 
-  // Full group check
   if (!hasFullColorGroup(playerId, tile.group)) {
     document.getElementById('action-banner').innerHTML = `❌ Butuh semua properti di group ${tile.group}!`;
     return;
@@ -1249,7 +1271,6 @@ function buildHotelAction(playerId, tileId) {
   const houses = state.propertyHouses[tileId] || 0;
   if (houses !== 4) return;
 
-  // Cek semua member group udah punya 4 rumah
   if (!groupTiles.every(t => (state.propertyHouses[t.id] || 0) >= 4)) {
     document.getElementById('action-banner').innerHTML = `❌ Semua properti di group ini harus punya 4 rumah dulu!`;
     return;
@@ -1279,7 +1300,6 @@ function sellHouseAction(playerId, tileId) {
   const houses = state.propertyHouses[tileId] || 0;
   if (houses === 0) return;
 
-  // Sell check
   if (!isSellAllowed(tile, groupTiles)) {
     document.getElementById('action-banner').innerHTML = `❌ Harus jual rata di semua properti group ini!`;
     return;
@@ -1300,6 +1320,7 @@ function sellHouseAction(playerId, tileId) {
 function updateCardHandUI() {
   const player = PLAYERS[0];
   const container = document.getElementById('card-hand-container');
+  if (!container) return;
   container.innerHTML = '';
   if (player.hand.length === 0) {
     container.innerHTML = `<span class="text-xs text-slate-500 italic">Belum ada kartu tersimpan.</span>`;
@@ -1322,13 +1343,16 @@ function updateCardHandUI() {
 
 function updateTrainButtonUI() {
   const count = state.trainTokens[0] || 0;
-  document.getElementById('train-count').innerText = count;
-  document.getElementById('btn-train').disabled = count <= 0;
+  const cntEl = document.getElementById('train-count');
+  if (cntEl) cntEl.innerText = count;
+  const btn = document.getElementById('btn-train');
+  if (btn) btn.disabled = count <= 0;
 }
 
 /* ============================================================ LOG ============================================================ */
 function addLog(msg, type = 'normal') {
   const feed = document.getElementById('game-log-feed');
+  if (!feed) return;
   const item = document.createElement('div');
   item.className = `log-entry p-1.5 rounded-lg border text-[10px] sm:text-[11px] leading-snug flex items-start gap-1.5 ${
     type === 'buy' ? 'bg-emerald-950/30 border-emerald-800/40 text-emerald-300' :
@@ -1347,7 +1371,7 @@ function addLog(msg, type = 'normal') {
   if (feed.children.length > 50) feed.lastChild.remove();
 }
 
-/* ============================================================ PROPERTY CARD RENDER ============================================================ */
+/* ============================================================ PROPERTY CARD ============================================================ */
 function renderPropertyCard(tile, opts = {}) {
   const { showActions = false, actionContext = 'view', player = null } = opts;
   const rawOwner = state.propertyOwners[tile.id];
@@ -1479,8 +1503,9 @@ document.getElementById('modal-view-card').addEventListener('click', () => close
 /* ============================================================ DICE ============================================================ */
 function handleRollDice() {
   if (state.isRolling || state.phase !== 'waiting-roll') return;
+  if (winnerTriggered) return;
   const player = PLAYERS[state.currentTurnIndex];
-  if (player.bankrupt) { handleEndTurn(); return; }
+  if (!player || player.bankrupt) { handleEndTurn(); return; }
 
   state.isRolling = true;
   state.phase = 'rolling';
@@ -1493,6 +1518,7 @@ function handleRollDice() {
   playSound('dice');
 
   setTimeout(() => {
+    if (winnerTriggered) { state.isRolling = false; return; }
     const val1 = Math.floor(Math.random() * 6) + 1;
     const val2 = Math.floor(Math.random() * 6) + 1;
     const total = val1 + val2;
@@ -1532,6 +1558,7 @@ function handleRollDice() {
 }
 
 function setDiceFace(element, value) {
+  if (!element) return;
   element.innerHTML = '';
   const face = document.createElement('div');
   face.className = 'dice-face';
@@ -1549,6 +1576,7 @@ function setDiceFace(element, value) {
 }
 
 function animateMoveToken(player, stepsLeft, onDone) {
+  if (winnerTriggered) { state.isRolling = false; return; }
   if (stepsLeft <= 0) { state.isRolling = false; onDone && onDone(); return; }
   player.pos = (player.pos + 1) % 40;
   if (player.pos === 0) {
@@ -1614,6 +1642,7 @@ function checkUltimateTrigger(player) {
 
 /* ============================================================ TILE ACTIONS ============================================================ */
 function handleTileAction(player) {
+  if (winnerTriggered) return;
   const tile = BOARD_TILES[player.pos];
   document.getElementById('action-banner').innerHTML = `Di <b>${tile.name}</b>`;
 
@@ -1967,9 +1996,10 @@ function deactivateUltimate() {
 
 /* ============================================================ DEBT ============================================================ */
 function attemptPayment(player, amount, creditorId, reason) {
+  if (winnerTriggered) return;
   if (player.money >= amount) {
     player.money -= amount;
-    if (creditorId !== null) PLAYERS[creditorId].money += amount;
+    if (creditorId !== null && PLAYERS[creditorId]) PLAYERS[creditorId].money += amount;
     playSound('cash');
     showFloatingMoney(player, `-$${amount}`);
     updatePlayersUI();
@@ -1987,6 +2017,7 @@ function openDebtModal() {
   const debt = state.pendingDebt;
   if (!debt) return;
   const player = PLAYERS[debt.playerId];
+  if (!player) return;
   document.getElementById('debt-message').innerText = `Bayar $${debt.amount} (${debt.reason}) — uang tidak cukup!`;
   document.getElementById('debt-current').innerText = `$${player.money}`;
   document.getElementById('debt-needed').innerText = `$${debt.amount}`;
@@ -2002,12 +2033,18 @@ function declareBankruptcy() {
   const debt = state.pendingDebt;
   if (!debt) return;
   const player = PLAYERS[debt.playerId];
+  if (!player) return;
   player.bankrupt = true;
   player.money = 0;
   Object.keys(state.propertyOwners).forEach(tid => {
     if (Number(state.propertyOwners[tid]) === Number(player.id)) {
-      if (debt.creditorId !== null) state.propertyOwners[tid] = debt.creditorId;
-      else { delete state.propertyOwners[tid]; delete state.propertyHouses[tid]; delete state.mortgaged[tid]; }
+      if (debt.creditorId !== null && PLAYERS[debt.creditorId]) {
+        state.propertyOwners[tid] = debt.creditorId;
+      } else {
+        delete state.propertyOwners[tid];
+        delete state.propertyHouses[tid];
+        delete state.mortgaged[tid];
+      }
     }
   });
   addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
@@ -2015,17 +2052,24 @@ function declareBankruptcy() {
   closeModal('modal-debt');
   closeModal('modal-manage');
   updatePlayersUI();
+
   const active = PLAYERS.filter(p => !p.bankrupt);
-  if (active.length === 1) setTimeout(() => triggerWinner(active[0]), 400);
+  if (active.length === 1 && active[0] && !winnerTriggered) {
+    setTimeout(() => triggerWinner(active[0]), 400);
+  } else if (active.length === 0 && !winnerTriggered) {
+    winnerTriggered = true;
+    addLog(`🤝 Tidak ada pemenang — semua bangkrut!`, 'system');
+  }
 }
 
 function checkDebtResolved() {
   const debt = state.pendingDebt;
   if (!debt) return;
   const player = PLAYERS[debt.playerId];
+  if (!player) { state.pendingDebt = null; return; }
   if (player.money >= debt.amount) {
     player.money -= debt.amount;
-    if (debt.creditorId !== null) PLAYERS[debt.creditorId].money += debt.amount;
+    if (debt.creditorId !== null && PLAYERS[debt.creditorId]) PLAYERS[debt.creditorId].money += debt.amount;
     addLog(`✅ ${player.name} bayar <b>$${debt.amount}</b>`, 'buy');
     playSound('cash');
     showFloatingMoney(player, `-$${debt.amount}`);
@@ -2066,7 +2110,7 @@ function openManageModal() {
   setTimeout(() => modal.querySelector('.modal-anim').classList.remove('scale-95', 'opacity-0'), 20);
 }
 
-/* ============================================================ BUILD/SELL ============================================================ */
+/* ============================================================ BUILD/SELL helpers ============================================================ */
 function canBuildHouse(player, tile) {
   if (tile.type !== 'property') return false;
   if (state.mortgaged[tile.id]) return false;
@@ -2099,24 +2143,14 @@ function canSellHouseFn(player, tile) {
   return houses === maxHouses;
 }
 
-function doBuildHouse(playerId, tileId) {
-  buildHouseAction(playerId, tileId);
-  openManageModal();
-}
-
-function doUpgradeHotel(playerId, tileId) {
-  buildHotelAction(playerId, tileId);
-  openManageModal();
-}
-
-function doSellHouse(playerId, tileId) {
-  sellHouseAction(playerId, tileId);
-  openManageModal();
-}
+function doBuildHouse(playerId, tileId) { buildHouseAction(playerId, tileId); openManageModal(); }
+function doUpgradeHotel(playerId, tileId) { buildHotelAction(playerId, tileId); openManageModal(); }
+function doSellHouse(playerId, tileId) { sellHouseAction(playerId, tileId); openManageModal(); }
 
 function doMortgage(playerId, tileId) {
   const player = PLAYERS[playerId];
   const tile = BOARD_TILES[tileId];
+  if (!player || !tile) return;
   if ((state.propertyHouses[tileId] || 0) > 0) return;
   state.mortgaged[tileId] = true;
   player.money += Math.floor(tile.price / 2);
@@ -2133,6 +2167,7 @@ function doMortgage(playerId, tileId) {
 function doUnmortgage(playerId, tileId) {
   const player = PLAYERS[playerId];
   const tile = BOARD_TILES[tileId];
+  if (!player || !tile) return;
   const cost = Math.floor(tile.price * 0.55);
   if (player.money < cost) return;
   state.mortgaged[tileId] = false;
@@ -2150,6 +2185,7 @@ function doUnmortgage(playerId, tileId) {
 function doSellLand(playerId, tileId) {
   const player = PLAYERS[playerId];
   const tile = BOARD_TILES[tileId];
+  if (!player || !tile) return;
   if ((state.propertyHouses[tileId] || 0) > 0) return;
   if (Number(state.propertyOwners[tileId]) !== Number(playerId)) return;
   const refund = Math.floor(tile.price / 2);
@@ -2202,6 +2238,7 @@ function aiDecideBuy(player, tile) {
   const buffer = 150;
   if (player.money >= tile.price + buffer) {
     setTimeout(() => {
+      if (winnerTriggered) return;
       player.money -= tile.price;
       state.propertyOwners[tile.id] = player.id;
       playSound('buy');
@@ -2214,6 +2251,7 @@ function aiDecideBuy(player, tile) {
     }, 700);
   } else {
     setTimeout(() => {
+      if (winnerTriggered) return;
       addLog(`🤖 AI lewati ${tile.name}`, 'normal');
       state.phase = 'end-turn';
       endTurnAfterDelay();
@@ -2223,8 +2261,10 @@ function aiDecideBuy(player, tile) {
 
 function aiHandleDebt(player) {
   const debt = state.pendingDebt;
+  if (!debt || !player) return;
   const target = debt.amount;
   setTimeout(() => {
+    if (winnerTriggered) return;
     let safety = 0;
     while (player.money < target && safety < 100) {
       safety++;
@@ -2272,7 +2312,7 @@ function aiHandleDebt(player) {
     updatePlayersUI();
     if (player.money >= target) {
       player.money -= target;
-      if (debt.creditorId !== null) PLAYERS[debt.creditorId].money += target;
+      if (debt.creditorId !== null && PLAYERS[debt.creditorId]) PLAYERS[debt.creditorId].money += target;
       addLog(`🤖 AI bayar $${target}`, 'buy');
       state.pendingDebt = null;
       state.phase = 'end-turn';
@@ -2281,22 +2321,32 @@ function aiHandleDebt(player) {
       player.bankrupt = true;
       Object.keys(state.propertyOwners).forEach(tid => {
         if (Number(state.propertyOwners[tid]) === Number(player.id)) {
-          if (debt.creditorId !== null) state.propertyOwners[tid] = debt.creditorId;
-          else { delete state.propertyOwners[tid]; delete state.propertyHouses[tid]; delete state.mortgaged[tid]; }
+          if (debt.creditorId !== null && PLAYERS[debt.creditorId]) {
+            state.propertyOwners[tid] = debt.creditorId;
+          } else {
+            delete state.propertyOwners[tid];
+            delete state.propertyHouses[tid];
+            delete state.mortgaged[tid];
+          }
         }
       });
       addLog(`💀 AI BANGKRUT!`, 'tax');
       state.pendingDebt = null;
       updatePlayersUI();
       const active = PLAYERS.filter(p => !p.bankrupt);
-      if (active.length === 1) setTimeout(() => triggerWinner(active[0]), 400);
+      if (active.length === 1 && active[0] && !winnerTriggered) {
+        setTimeout(() => triggerWinner(active[0]), 400);
+      } else if (active.length === 0 && !winnerTriggered) {
+        winnerTriggered = true;
+        addLog(`🤝 Tidak ada pemenang — semua bangkrut!`, 'system');
+      }
     }
   }, 1200);
 }
 
 function aiTryBuildHouses() {
   const player = PLAYERS[1];
-  if (player.bankrupt || player.inJail) return;
+  if (!player || player.bankrupt || player.inJail) return;
   const buffer = 300;
   if (player.money <= buffer) return;
   const buildable = BOARD_TILES.filter(t =>
@@ -2324,9 +2374,10 @@ function openBuyModal(tile) {
 }
 
 function confirmBuyProperty() {
+  if (winnerTriggered) return;
   const player = PLAYERS[state.currentTurnIndex];
   const tile = state.landedTileForBuy;
-  if (!tile) return;
+  if (!tile || !player) return;
   if (player.money >= tile.price) {
     player.money -= tile.price;
     state.propertyOwners[tile.id] = player.id;
@@ -2342,9 +2393,11 @@ function confirmBuyProperty() {
 }
 
 function declineBuyProperty() {
+  if (winnerTriggered) return;
   closeModal('modal-property');
   state.landedTileForBuy = null;
-  addLog(`${PLAYERS[state.currentTurnIndex].name} lewati pembelian.`, 'normal');
+  const currP = PLAYERS[state.currentTurnIndex];
+  if (currP) addLog(`${currP.name} lewati pembelian.`, 'normal');
   state.phase = 'end-turn';
   endTurnAfterDelay();
 }
@@ -2411,6 +2464,7 @@ function triggerChanceCard(player, type) {
 
   const continueBtn = document.getElementById('card-continue-btn');
   const finish = () => {
+    if (winnerTriggered) return;
     closeModal('modal-card');
     state.phase = 'end-turn';
     endTurnAfterDelay();
@@ -2454,10 +2508,12 @@ function triggerChanceCard(player, type) {
     const canTrigger = ownerId !== undefined && !state.ultimate.active;
 
     const handleContinue = () => {
+      if (winnerTriggered) return;
       closeModal('modal-card');
 
       if (canTrigger) {
         setTimeout(() => {
+          if (winnerTriggered) return;
           addLog(`👑 KARTU MEMICU ULTIMATE!`, 'ultimate');
           addLog(`👑 Dewa Rongawi memanggil kekuatan kuno...`, 'ultimate');
           const ultKeys = ['rongawi', 'storm', 'tax', 'fury'];
@@ -2466,11 +2522,13 @@ function triggerChanceCard(player, type) {
         }, 300);
 
         setTimeout(() => {
+          if (winnerTriggered) return;
           state.phase = 'end-turn';
           endTurnAfterDelay();
         }, 3800);
       } else {
         setTimeout(() => {
+          if (winnerTriggered) return;
           if (ownerId === undefined) {
             addLog(`👑 Tidak ada pemilik Kekaisaran Rongawi. Ultimate tidak terpicu.`, 'ultimate');
           } else if (state.ultimate.active) {
@@ -2574,6 +2632,7 @@ function openTrainModal() {
 }
 
 function useTrainTo(tileId) {
+  if (winnerTriggered) return;
   const player = PLAYERS[state.currentTurnIndex];
   const tokens = state.trainTokens[player.id] || 0;
   if (tokens <= 0) return;
@@ -2600,6 +2659,7 @@ function useTrainTo(tileId) {
   closeModal('modal-train');
 
   setTimeout(() => {
+    if (winnerTriggered) return;
     state.currentDiceTotal = 7;
     if (BOARD_TILES[tileId].type === 'go') {
       player.money += 200;
@@ -2631,6 +2691,7 @@ function sendToJail(player) {
     setTimeout(() => modal.querySelector('.modal-anim').classList.remove('scale-95', 'opacity-0'), 20);
   } else {
     setTimeout(() => {
+      if (winnerTriggered) return;
       const jailIdx = player.hand.findIndex(c => c.type === 'jail');
       if (jailIdx >= 0) useJailCardAi(player, jailIdx);
       else if (player.money >= 200) payBail();
@@ -2664,7 +2725,7 @@ function useJailCardAi(player, idx) {
   updatePlayersUI();
   updateCardHandUI();
   state.phase = 'waiting-roll';
-  setTimeout(() => handleRollDice(), 500);
+  setTimeout(() => { if (!winnerTriggered) handleRollDice(); }, 500);
 }
 
 function payBail() {
@@ -2679,7 +2740,7 @@ function payBail() {
   closeModal('modal-jail');
   updatePlayersUI();
   state.phase = 'waiting-roll';
-  if (player.isAI) setTimeout(() => handleRollDice(), 500);
+  if (player.isAI) setTimeout(() => { if (!winnerTriggered) handleRollDice(); }, 500);
 }
 
 function rollForDoubles() {
@@ -2698,7 +2759,7 @@ function rollForDoubles() {
     state.currentDiceTotal = val1 + val2;
     addLog(`🎲 ${player.name} DOUBLE! Bebas!`, 'jail');
     updatePlayersUI();
-    setTimeout(() => animateMoveToken(player, val1 + val2, () => handleTileAction(player)), 600);
+    setTimeout(() => { if (!winnerTriggered) animateMoveToken(player, val1 + val2, () => handleTileAction(player)); }, 600);
   } else {
     player.jailTurns++;
     state.jailAttempts = player.jailTurns;
@@ -2712,7 +2773,7 @@ function rollForDoubles() {
         player.jailTurns = 0;
         state.currentDiceTotal = val1 + val2;
         updatePlayersUI();
-        setTimeout(() => animateMoveToken(player, val1 + val2, () => handleTileAction(player)), 600);
+        setTimeout(() => { if (!winnerTriggered) animateMoveToken(player, val1 + val2, () => handleTileAction(player)); }, 600);
       } else attemptPayment(player, 50, null, 'bail');
     } else {
       if (!player.isAI) {
@@ -2748,23 +2809,39 @@ function closeModal(id) {
 
 /* ============================================================ END TURN ============================================================ */
 function endTurnAfterDelay() {
+  if (winnerTriggered) return;
   const player = PLAYERS[state.currentTurnIndex];
+  if (!player) return;
+
   if (state.doublesCount > 0 && !player.inJail && player.money >= 0 && !player.bankrupt) {
     setTimeout(() => {
+      if (winnerTriggered) return;
       state.phase = 'waiting-roll';
       document.getElementById('btn-roll-dice').disabled = false;
-      if (player.isAI) setTimeout(() => handleRollDice(), 800);
+      if (player.isAI) setTimeout(() => { if (!winnerTriggered) handleRollDice(); }, 800);
       else document.getElementById('action-banner').innerHTML = `🎯 Double! Giliranmu lagi.`;
     }, 500);
     return;
   }
+
   if (player.money < 0 && !state.pendingDebt) {
     player.bankrupt = true;
     addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
   }
+
   const active = PLAYERS.filter(p => !p.bankrupt);
-  if (active.length === 1) { setTimeout(() => triggerWinner(active[0]), 400); return; }
+  if (active.length === 1 && active[0] && !winnerTriggered) {
+    setTimeout(() => triggerWinner(active[0]), 400);
+    return;
+  }
+  if (active.length === 0 && !winnerTriggered) {
+    winnerTriggered = true;
+    addLog(`🤝 Tidak ada pemenang — semua bangkrut!`, 'system');
+    return;
+  }
+
   setTimeout(() => {
+    if (winnerTriggered) return;
     document.getElementById('btn-end-turn').disabled = false;
     if (player.isAI) handleEndTurn();
   }, 500);
@@ -2773,8 +2850,11 @@ function endTurnAfterDelay() {
 function handleEndTurn() {
   if (state.isRolling) return;
   if (state.pendingDebt) return;
+  if (winnerTriggered) return;
 
   const player = PLAYERS[state.currentTurnIndex];
+  if (!player) return;
+
   if (player.isAI) aiTryBuildHouses();
 
   if (player.money < 0 && !state.pendingDebt) {
@@ -2783,15 +2863,26 @@ function handleEndTurn() {
   }
 
   const active = PLAYERS.filter(p => !p.bankrupt);
-  if (active.length === 1) { triggerWinner(active[0]); return; }
+  if (active.length === 1 && active[0]) {
+    triggerWinner(active[0]);
+    return;
+  }
+  if (active.length === 0) {
+    winnerTriggered = true;
+    addLog(`🤝 Tidak ada pemenang — semua bangkrut!`, 'system');
+    return;
+  }
 
   state.doublesCount = 0;
 
   const prevTurnIdx = state.currentTurnIndex;
 
+  let safety = 0;
   do {
     state.currentTurnIndex = (state.currentTurnIndex + 1) % PLAYERS.length;
-  } while (PLAYERS[state.currentTurnIndex].bankrupt);
+    safety++;
+    if (safety > PLAYERS.length * 2) break;
+  } while (PLAYERS[state.currentTurnIndex] && PLAYERS[state.currentTurnIndex].bankrupt);
 
   const isNewRound = state.currentTurnIndex === 0 && prevTurnIdx !== 0;
 
@@ -2808,6 +2899,8 @@ function handleEndTurn() {
   state.phase = 'waiting-roll';
 
   const currP = PLAYERS[state.currentTurnIndex];
+  if (!currP || currP.bankrupt) return;
+
   document.getElementById('action-banner').innerHTML = `Giliran <b>${currP.name}</b>`;
 
   renderTokensOnBoard();
@@ -2825,6 +2918,7 @@ function handleEndTurn() {
 
     if (currP.inJail) {
       setTimeout(() => {
+        if (winnerTriggered) return;
         document.getElementById('roll-btn-label').innerText = 'Kocok Dadu';
         state.isAITurn = false;
         const jailIdx = currP.hand.findIndex(c => c.type === 'jail');
@@ -2836,6 +2930,7 @@ function handleEndTurn() {
     }
 
     setTimeout(() => {
+      if (winnerTriggered) return;
       document.getElementById('roll-btn-label').innerText = 'Kocok Dadu';
       state.isAITurn = false;
       if (aiShouldUseTrain) {
@@ -2882,22 +2977,50 @@ function pickAITrainTarget(player) {
   return candidates[0].id;
 }
 
-/* ============================================================ WINNER ============================================================ */
+/* ============================================================ WINNER (FIXED) ============================================================ */
 function triggerWinner(winner) {
+  // Guard 1: Anti double-trigger
+  if (winnerTriggered) return;
+  // Guard 2: Winner harus valid object
+  if (!winner || typeof winner !== 'object') return;
+  // Guard 3: Modal harus ada
+  const modal = document.getElementById('modal-winner');
+  if (!modal) return;
+  // Guard 4: Modal jangan udah keliatan
+  if (!modal.classList.contains('hidden')) return;
+
+  winnerTriggered = true;
   playSound('win');
-  document.getElementById('winner-name').innerText = `${winner.token} ${winner.name}`;
-  document.getElementById('winner-cash').innerText = `$${winner.money}`;
-  const count = Object.values(state.propertyOwners).filter(id => Number(id) === Number(winner.id)).length;
-  document.getElementById('winner-props').innerText = count;
-  document.getElementById('modal-winner').classList.remove('hidden');
+
+  // Safe access
+  const winnerName = `${winner.token || '?'} ${winner.name || 'Unknown'}`;
+  const winnerMoney = typeof winner.money === 'number' ? winner.money : 0;
+
+  const nameEl = document.getElementById('winner-name');
+  const cashEl = document.getElementById('winner-cash');
+  const propsEl = document.getElementById('winner-props');
+  if (nameEl) nameEl.innerText = winnerName;
+  if (cashEl) cashEl.innerText = `$${winnerMoney}`;
+
+  const count = Object.values(state.propertyOwners)
+    .filter(id => Number(id) === Number(winner.id)).length;
+  if (propsEl) propsEl.innerText = count;
+
+  modal.classList.remove('hidden');
   startConfetti();
 }
 
 function startConfetti() {
+  if (confettiActive) return;
   const canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  confettiActive = true;
+
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+
   const particles = Array.from({ length: 80 }).map(() => ({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height - canvas.height,
@@ -2907,7 +3030,14 @@ function startConfetti() {
     rot: Math.random() * Math.PI * 2,
     vr: (Math.random() - 0.5) * 0.2
   }));
+
+  let frameCount = 0;
+  const MAX_FRAMES = 60 * 10;
+
   function render() {
+    if (!confettiActive) return;
+    frameCount++;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach(p => {
       p.y += p.speed;
@@ -2920,15 +3050,33 @@ function startConfetti() {
       ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size/2);
       ctx.restore();
     });
-    if (!document.getElementById('modal-winner').classList.contains('hidden')) {
-      requestAnimationFrame(render);
+
+    const modal = document.getElementById('modal-winner');
+    if (!modal || modal.classList.contains('hidden') || frameCount > MAX_FRAMES) {
+      confettiActive = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
     }
+    requestAnimationFrame(render);
   }
   render();
 }
 
+function stopConfetti() {
+  confettiActive = false;
+  const canvas = document.getElementById('confetti-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
 /* ============================================================ RESET ============================================================ */
 function resetGame() {
+  winnerTriggered = false;
+  confettiActive = false;
+  stopConfetti();
+
   PLAYERS.forEach(p => {
     p.money = 1500; p.pos = 0; p.inJail = false; p.jailTurns = 0;
     p.bankrupt = false; p.getOutCard = 0; p.hand = [];
@@ -2976,7 +3124,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Space' && window.innerWidth >= 1024) {
     e.preventDefault();
     const btn = document.getElementById('btn-roll-dice');
-    if (!btn.disabled && !state.isAITurn && !state.pendingDebt) handleRollDice();
+    if (btn && !btn.disabled && !state.isAITurn && !state.pendingDebt && !winnerTriggered) handleRollDice();
   }
   if (e.code === 'Escape') {
     closeModal('modal-view-card');
