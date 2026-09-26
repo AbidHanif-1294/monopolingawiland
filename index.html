@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Monopoly Ngawiland</title>
+<title>Monopoly Nusantara — Ultimate Edition</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
@@ -532,62 +532,6 @@
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
 
-  /* ========== DEBUG PANEL ========== */
-  .debug-panel {
-    position: fixed;
-    bottom: 8px;
-    right: 8px;
-    z-index: 9997;
-    max-width: 340px;
-    font-family: 'Courier New', monospace;
-    font-size: 10px;
-    background: rgba(15, 23, 42, 0.97);
-    border: 1px solid #334155;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-  .debug-panel.collapsed { max-width: 80px; max-height: 36px; }
-  .debug-panel.collapsed .debug-body,
-  .debug-panel.collapsed .debug-header-title { display: none; }
-  .debug-header {
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    padding: 6px 10px;
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer;
-    border-bottom: 1px solid #334155;
-    font-weight: bold;
-    color: #60a5fa;
-  }
-  .debug-body { max-height: 420px; overflow-y: auto; padding: 8px; }
-  .debug-section { margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #334155; }
-  .debug-section:last-child { border-bottom: none; }
-  .debug-label { color: #94a3b8; font-weight: bold; margin-bottom: 3px; font-size: 9px; letter-spacing: 1px; }
-  .debug-value { color: #f8fafc; }
-  .debug-value.good { color: #10b981; }
-  .debug-value.warn { color: #f59e0b; }
-  .debug-value.bad { color: #ef4444; }
-  .debug-btn {
-    padding: 3px 6px; background: #334155; color: #f8fafc;
-    border: 1px solid #475569; border-radius: 4px; cursor: pointer;
-    font-size: 9px; margin: 1px; font-family: inherit;
-  }
-  .debug-btn:hover { background: #475569; }
-  .debug-btn.danger { background: #7f1d1d; border-color: #991b1b; }
-  .debug-btn.danger:hover { background: #991b1b; }
-  .debug-log {
-    max-height: 130px; overflow-y: auto;
-    background: #020617; border-radius: 4px; padding: 4px;
-    font-size: 9px; line-height: 1.35;
-  }
-  .debug-log-entry { color: #64748b; padding: 1px 0; }
-  .debug-log-entry.event { color: #60a5fa; }
-  .debug-log-entry.warn { color: #f59e0b; }
-  .debug-log-entry.error { color: #ef4444; font-weight: bold; }
-  .debug-log-entry.ultimate { color: #fbbf24; font-weight: bold; }
-  .debug-log-entry.build { color: #10b981; }
-  .debug-log-entry.money { color: #a78bfa; }
 </style>
 </head>
 <body>
@@ -599,9 +543,9 @@
       <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-sm sm:text-xl text-white shadow-lg shadow-blue-500/30 shrink-0">M</div>
       <div class="min-w-0">
         <h1 class="text-sm sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent truncate">
-          MONOPOLY NGAWILAND
+          MONOPOLY NUSANTARA
         </h1>
-        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Ngawi Edition - Berpetualanglah untuk mencari para meber JMK48 di setiap sudut kotanya!</p>
+        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Ultimate Edition + Debug</p>
       </div>
     </div>
 
@@ -631,7 +575,7 @@
               <div class="inline-block bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white text-xs sm:text-xl font-black px-3 sm:px-6 py-0.5 sm:py-1.5 rounded-md shadow-lg tracking-wider border border-red-400/30 uppercase transform -rotate-3">
                 MONOPOLY
               </div>
-              <p class="text-[8px] sm:text-xs text-slate-400 mt-1 font-medium tracking-wide hidden sm:block">NGAWI EDITION</p>
+              <p class="text-[8px] sm:text-xs text-slate-400 mt-1 font-medium tracking-wide hidden sm:block">NUSANTARA EDITION</p>
             </div>
 
             <div class="flex flex-col items-center justify-center gap-2 sm:gap-4 my-auto">
@@ -736,72 +680,6 @@
         </div>
       </div>
     </section>
-  </div>
-</div>
-
-<!-- DEBUG PANEL -->
-<div id="debug-panel" class="debug-panel">
-  <div class="debug-header" onclick="toggleDebugPanel()">
-    <span>🐛 <span class="debug-header-title">DEBUG</span></span>
-    <span id="debug-toggle-icon">−</span>
-  </div>
-  <div class="debug-body">
-    <div class="debug-section">
-      <div class="debug-label">📍 STATE</div>
-      <div>Ronde: <span id="dbg-round" class="debug-value">1</span></div>
-      <div>Turn idx: <span id="dbg-turn-idx" class="debug-value">0</span></div>
-      <div>Phase: <span id="dbg-phase" class="debug-value">-</span></div>
-      <div>Dice: <span id="dbg-dice" class="debug-value">-</span></div>
-      <div>Doubles: <span id="dbg-doubles" class="debug-value">0</span></div>
-      <div>isRolling: <span id="dbg-isrolling" class="debug-value bad">NO</span></div>
-      <div>Winner triggered: <span id="dbg-winner" class="debug-value bad">NO</span></div>
-      <div>Tiles in DOM: <span id="dbg-tiles" class="debug-value">0</span></div>
-    </div>
-    <div class="debug-section">
-      <div class="debug-label">🏠 BUILD STATE (KAMU)</div>
-      <div>Properti owned: <span id="dbg-props" class="debug-value">0</span></div>
-      <div>Full groups: <span id="dbg-fullgroups" class="debug-value">-</span></div>
-      <div>Rumah/hotel: <span id="dbg-houses" class="debug-value">-</span></div>
-    </div>
-    <div class="debug-section">
-      <div class="debug-label">👑 ULTIMATE</div>
-      <div>Active: <span id="dbg-ult-active" class="debug-value bad">NO</span></div>
-      <div>Type: <span id="dbg-ult-type" class="debug-value">-</span></div>
-      <div>Owner: <span id="dbg-ult-owner" class="debug-value">-</span></div>
-      <div>Rounds left: <span id="dbg-ult-rounds" class="debug-value">0</span></div>
-      <div>Last tick round: <span id="dbg-ult-tick" class="debug-value">0</span></div>
-    </div>
-    <div class="debug-section">
-      <div class="debug-label">🎮 MANUAL CONTROLS</div>
-      <button class="debug-btn" onclick="dbgForceUltimate('rongawi')">👑 Rongawi</button>
-      <button class="debug-btn" onclick="dbgForceUltimate('storm')">🌪️ Storm</button>
-      <button class="debug-btn" onclick="dbgForceUltimate('tax')">💰 Tax</button>
-      <button class="debug-btn" onclick="dbgForceUltimate('fury')">🔥 Fury</button>
-      <br>
-      <button class="debug-btn" onclick="dbgForceEndUltimate()">🚫 End Ult</button>
-      <button class="debug-btn" onclick="dbgGiveToken()">🚂 +Train</button>
-      <button class="debug-btn" onclick="dbgGiveMoney()">💰 +$1000</button>
-      <button class="debug-btn" onclick="dbgNextTurn()">⏭️ End Turn</button>
-      <br>
-      <button class="debug-btn" onclick="dbgUnstickRoll()">🔓 Unstick Roll</button>
-      <br>
-      <button class="debug-btn" onclick="dbgGiveRongawiToAI()">🤖 AI Dapat 37+39</button>
-      <button class="debug-btn" onclick="dbgGiveRongawiToMe()">👤 Aku Dapat 37+39</button>
-      <br>
-      <button class="debug-btn" onclick="dbgGiveFullGroup('brown')">🏘️ Full Brown</button>
-      <button class="debug-btn" onclick="dbgGiveFullGroup('lightblue')">🏘️ Full LightBlue</button>
-      <button class="debug-btn" onclick="dbgGiveFullGroup('orange')">🏘️ Full Orange</button>
-      <br>
-      <button class="debug-btn" onclick="dbgBuildMax('brown')">🏠 Auto Build Brown</button>
-      <button class="debug-btn" onclick="dbgBuildMax('orange')">🏠 Auto Build Orange</button>
-      <br>
-      <button class="debug-btn danger" onclick="dbgResetAll()">🔥 HARD RESET</button>
-      <button class="debug-btn" onclick="dbgTogglePanel()">📊 Toggle</button>
-    </div>
-    <div class="debug-section">
-      <div class="debug-label">📋 EVENT LOG</div>
-      <div id="dbg-log" class="debug-log"></div>
-    </div>
   </div>
 </div>
 
@@ -921,178 +799,12 @@ let confettiActive = false;
 let boardInitialized = false;
 let soundEnabled = true;
 let audioCtx = null;
-let debugEnabled = true;
-const debugLog = [];
-
-/* ============================================================ DEBUG ============================================================ */
-function dbg(msg, type = 'event') {
-  if (!debugEnabled) return;
-  const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  debugLog.unshift({ time, msg, type });
-  if (debugLog.length > 100) debugLog.pop();
-  renderDebugLog();
-  console.log(`[DBG ${type}]`, msg);
-}
-function renderDebugLog() {
-  const el = document.getElementById('dbg-log');
-  if (!el) return;
-  el.innerHTML = debugLog.slice(0, 20).map(e =>
-    `<div class="debug-log-entry ${e.type}">[${e.time}] ${e.msg}</div>`
-  ).join('');
-}
-function toggleDebugPanel() {
-  const panel = document.getElementById('debug-panel');
-  if (!panel) return;
-  panel.classList.toggle('collapsed');
-  const icon = document.getElementById('debug-toggle-icon');
-  if (icon) icon.innerText = panel.classList.contains('collapsed') ? '+' : '−';
-}
-function dbgTogglePanel() { toggleDebugPanel(); }
-
-function updateDebugPanel() {
-  if (!debugEnabled) return;
-  try {
-    const s = state;
-    const set = (id, val, cls) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.innerText = val;
-      if (cls) el.className = 'debug-value ' + cls;
-    };
-    set('dbg-round', s.roundCount);
-    set('dbg-turn-idx', s.currentTurnIndex);
-    set('dbg-phase', s.phase);
-    set('dbg-dice', `${s.dice?.[0] || 0}+${s.dice?.[1] || 0}`);
-    set('dbg-doubles', s.doublesCount);
-    set('dbg-isrolling', s.isRolling ? 'YES' : 'NO', s.isRolling ? 'warn' : 'good');
-    set('dbg-winner', winnerTriggered ? 'YES' : 'NO', winnerTriggered ? 'bad' : 'good');
-    set('dbg-tiles', document.querySelectorAll('[id^="tile-"]').length);
-
-    // Build state
-    const me = PLAYERS[0];
-    const myProps = BOARD_TILES.filter(t => Number(state.propertyOwners[t.id]) === Number(me.id));
-    set('dbg-props', myProps.length);
-    const fullGroups = [];
-    Object.keys(COLOR_GROUP_INFO).forEach(g => {
-      if (hasFullColorGroup(me.id, g)) fullGroups.push(g);
-    });
-    set('dbg-fullgroups', fullGroups.join(', ') || '-');
-    const houseSummary = myProps.map(t => `${t.name}: ${state.propertyHouses[t.id] || 0}`).join(' | ') || '-';
-    set('dbg-houses', houseSummary);
-
-    // Ultimate
-    const ult = s.ultimate;
-    set('dbg-ult-active', ult.active ? 'YES' : 'NO', ult.active ? 'good' : 'bad');
-    set('dbg-ult-type', ult.type || '-');
-    set('dbg-ult-owner', ult.ownerId !== null ? (PLAYERS[ult.ownerId]?.name || '?') : '-');
-    set('dbg-ult-rounds', ult.roundsLeft);
-    set('dbg-ult-tick', ult.lastTickRound ?? '-');
-  } catch (e) {
-    console.error('[DBG] updateDebugPanel error:', e);
-  }
-}
-
-/* ============================================================ DEBUG CONTROLS ============================================================ */
-function dbgForceUltimate(type) {
-  if (state.ultimate.active) { dbg('Ultimate sudah aktif', 'warn'); return; }
-  const tile = BOARD_TILES.find(t => t.isUltimateTile);
-  if (!tile) return;
-  if (state.propertyOwners[tile.id] === undefined) {
-    state.propertyOwners[tile.id] = 1;
-    markTileOwner(tile.id, 1);
-  }
-  if (state.propertyOwners[37] === undefined) {
-    state.propertyOwners[37] = 1;
-    markTileOwner(37, 1);
-  }
-  dbg(`Force activate ultimate: ${type}`, 'ultimate');
-  activateUltimate(1, type);
-}
-function dbgForceEndUltimate() {
-  if (!state.ultimate.active) { dbg('No ultimate active', 'warn'); return; }
-  dbg('Force end ultimate', 'warn');
-  deactivateUltimate();
-}
-function dbgGiveToken() {
-  state.trainTokens[0] = (state.trainTokens[0] || 0) + 1;
-  PLAYERS[0].hand.push({ type: 'train', name: 'Kereta Tembus', desc: 'Debug', icon: '🚂' });
-  updateCardHandUI();
-  updateTrainButtonUI();
-  dbg('+1 Train token untuk Kamu', 'event');
-}
-function dbgGiveMoney() {
-  PLAYERS[0].money += 1000;
-  updatePlayersUI();
-  dbg('+$1000 untuk Kamu', 'money');
-}
-function dbgNextTurn() {
-  dbg('Force end turn', 'warn');
-  if (winnerTriggered) return;
-  if (state.phase === 'waiting-roll' || state.phase === 'end-turn') {
-    state.doublesCount = 0;
-    handleEndTurn();
-  } else {
-    state.phase = 'end-turn';
-    handleEndTurn();
-  }
-}
-function dbgUnstickRoll() {
-  state.isRolling = false;
-  const rollBtn = document.getElementById('btn-roll-dice');
-  if (rollBtn) rollBtn.disabled = false;
-  const dice1 = document.getElementById('dice-1');
-  const dice2 = document.getElementById('dice-2');
-  if (dice1) dice1.classList.remove('dice-rolling');
-  if (dice2) dice2.classList.remove('dice-rolling');
-  updateDebugPanel();
-  dbg('Manual unstick: isRolling forced to false', 'warn');
-}
-function dbgGiveRongawiToAI() {
-  state.propertyOwners[37] = 1;
-  state.propertyOwners[39] = 1;
-  markTileOwner(37, 1);
-  markTileOwner(39, 1);
-  PLAYERS[1].properties = [37, 39];
-  updatePlayersUI();
-  dbg('AI dapat Rongawi 37+39', 'event');
-}
-function dbgGiveRongawiToMe() {
-  state.propertyOwners[37] = 0;
-  state.propertyOwners[39] = 0;
-  markTileOwner(37, 0);
-  markTileOwner(39, 0);
-  PLAYERS[0].properties = [37, 39];
-  updatePlayersUI();
-  dbg('Kamu dapat Rongawi 37+39', 'event');
-}
-function dbgGiveFullGroup(groupKey) {
-  const info = COLOR_GROUP_INFO[groupKey];
-  if (!info) { dbg('Group not found', 'error'); return; }
-  info.members.forEach(tid => {
-    state.propertyOwners[tid] = 0;
-    markTileOwner(tid, 0);
-    if (!PLAYERS[0].properties.includes(tid)) PLAYERS[0].properties.push(tid);
-  });
-  updatePlayersUI();
-  dbg(`Kamu dapat full group: ${groupKey}`, 'event');
-}
-function dbgBuildMax(groupKey) {
-  const info = COLOR_GROUP_INFO[groupKey];
-  if (!info) { dbg('Group not found', 'error'); return; }
-  info.members.forEach(tid => {
-    state.propertyHouses[tid] = 4;
-    updateTileHouses(tid);
-  });
-  updatePlayersUI();
-  dbg(`Auto build 4 rumah di ${groupKey}`, 'build');
-}
-function dbgResetAll() {
-  dbg('HARD RESET', 'error');
-  winnerTriggered = false;
-  confettiActive = false;
-  stopConfetti();
-  location.reload();
-}
+/* ============================================================ DEBUG (dinonaktifkan) ============================================================ */
+// Fungsi ini sengaja dijadikan no-op (bukan dihapus total) supaya seluruh
+// pemanggilan dbg(...)/updateDebugPanel(...) yang tersebar di banyak fungsi
+// game tidak perlu dihapus satu-satu dan tidak menyebabkan error runtime.
+function dbg() {}
+function updateDebugPanel() {}
 
 /* ============================================================ COLLAPSE ============================================================ */
 function toggleCollapse(id, headerEl) {
@@ -3287,7 +2999,7 @@ function endTurnAfterDelay() {
 
   if (player.money < 0 && !state.pendingDebt) {
     player.bankrupt = true;
-    addLog(`💀 ${player.name} BANGKRUT! YAHAHAHA POKE!`, 'tax');
+    addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
   }
 
   const active = PLAYERS.filter(p => !p.bankrupt);
@@ -3321,7 +3033,7 @@ function handleEndTurn() {
 
   if (player.money < 0 && !state.pendingDebt) {
     player.bankrupt = true;
-    addLog(`💀 ${player.name} BANGKRUT! YAHAHAHA POKE!`, 'tax');
+    addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
   }
 
   const active = PLAYERS.filter(p => !p.bankrupt);
