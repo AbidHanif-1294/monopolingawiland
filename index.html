@@ -753,6 +753,7 @@
       <div>Phase: <span id="dbg-phase" class="debug-value">-</span></div>
       <div>Dice: <span id="dbg-dice" class="debug-value">-</span></div>
       <div>Doubles: <span id="dbg-doubles" class="debug-value">0</span></div>
+      <div>isRolling: <span id="dbg-isrolling" class="debug-value bad">NO</span></div>
       <div>Winner triggered: <span id="dbg-winner" class="debug-value bad">NO</span></div>
       <div>Tiles in DOM: <span id="dbg-tiles" class="debug-value">0</span></div>
     </div>
@@ -781,6 +782,8 @@
       <button class="debug-btn" onclick="dbgGiveToken()">🚂 +Train</button>
       <button class="debug-btn" onclick="dbgGiveMoney()">💰 +$1000</button>
       <button class="debug-btn" onclick="dbgNextTurn()">⏭️ End Turn</button>
+      <br>
+      <button class="debug-btn" onclick="dbgUnstickRoll()">🔓 Unstick Roll</button>
       <br>
       <button class="debug-btn" onclick="dbgGiveRongawiToAI()">🤖 AI Dapat 37+39</button>
       <button class="debug-btn" onclick="dbgGiveRongawiToMe()">👤 Aku Dapat 37+39</button>
@@ -961,6 +964,7 @@ function updateDebugPanel() {
     set('dbg-phase', s.phase);
     set('dbg-dice', `${s.dice?.[0] || 0}+${s.dice?.[1] || 0}`);
     set('dbg-doubles', s.doublesCount);
+    set('dbg-isrolling', s.isRolling ? 'YES' : 'NO', s.isRolling ? 'warn' : 'good');
     set('dbg-winner', winnerTriggered ? 'YES' : 'NO', winnerTriggered ? 'bad' : 'good');
     set('dbg-tiles', document.querySelectorAll('[id^="tile-"]').length);
 
@@ -1031,6 +1035,17 @@ function dbgNextTurn() {
     state.phase = 'end-turn';
     handleEndTurn();
   }
+}
+function dbgUnstickRoll() {
+  state.isRolling = false;
+  const rollBtn = document.getElementById('btn-roll-dice');
+  if (rollBtn) rollBtn.disabled = false;
+  const dice1 = document.getElementById('dice-1');
+  const dice2 = document.getElementById('dice-2');
+  if (dice1) dice1.classList.remove('dice-rolling');
+  if (dice2) dice2.classList.remove('dice-rolling');
+  updateDebugPanel();
+  dbg('Manual unstick: isRolling forced to false', 'warn');
 }
 function dbgGiveRongawiToAI() {
   state.propertyOwners[37] = 1;
@@ -1730,11 +1745,12 @@ function updateCardHandUI() {
 }
 
 function updateTrainButtonUI() {
-  const count = state.trainTokens[0] || 0;
+  const activeId = state.currentTurnIndex;
+  const count = state.trainTokens[activeId] || 0;
   const cntEl = document.getElementById('train-count');
   if (cntEl) cntEl.innerText = count;
   const btn = document.getElementById('btn-train');
-  if (btn) btn.disabled = count <= 0;
+  if (btn) btn.disabled = count <= 0 || activeId !== 0;
 }
 
 /* ============================================================ LOG ============================================================ */
@@ -1934,7 +1950,7 @@ function handleRollDice() {
     addLog(`<b>${player.name}</b>: <b>${val1}+${val2}=${total}</b>${isDouble ? ' 🎯' : ''}`, 'roll');
     dbg(`${player.name} rolled ${val1}+${val2}=${total}${isDouble ? ' DOUBLE' : ''}`);
 
-    if (player.inJail) { handleJailRoll(player, val1, val2, total); return; }
+    if (player.inJail) { state.isRolling = false; handleJailRoll(player, val1, val2, total); return; }
 
     if (isDouble) {
       state.doublesCount++;
@@ -1943,6 +1959,7 @@ function handleRollDice() {
         sendToJail(player);
         state.doublesCount = 0;
         state.phase = 'end-turn';
+        state.isRolling = false;
         endTurnAfterDelay();
         return;
       }
@@ -2044,7 +2061,11 @@ function handleTileAction(player) {
   if (banner) banner.innerHTML = `Di <b>${tile.name}</b>`;
   dbg(`${player.name} landed on ${tile.name} (${tile.type})`, 'event');
 
-  if (state.ultimate.active && state.ultimate.type === 'rongawi') {
+  const rawOwnerForUlt = state.propertyOwners[tile.id];
+  const ownerIdForUlt = rawOwnerForUlt !== undefined ? Number(rawOwnerForUlt) : undefined;
+  const isOwnedByOther = ownerIdForUlt !== undefined && ownerIdForUlt !== Number(player.id);
+
+  if (state.ultimate.active && state.ultimate.type === 'rongawi' && isOwnedByOther) {
     const isSpecialTile = ['corner', 'special', 'rr', 'util'].includes(tile.group);
     if (tile.type === 'property' && !isSpecialTile) {
       const ultOwner = PLAYERS[state.ultimate.ownerId];
@@ -2334,6 +2355,15 @@ function deactivateUltimate() {
     }
   });
 
+  // Kumpulkan semua tile id yang perlu di-refresh ikon rumahnya:
+  // gabungan antara state SEBELUM restore dan SESUDAH restore, supaya
+  // tile yang sempat naik lalu turun ke 0 (mis. karena efek Fury) juga
+  // ikon rumahnya ikut dibersihkan, bukan cuma yang masih > 0.
+  const houseTileIdsToRefresh = new Set([
+    ...Object.keys(state.propertyHouses),
+    ...Object.keys(restoredHouses)
+  ]);
+
   state.propertyOwners = restoredOwners;
   state.propertyHouses = restoredHouses;
   state.mortgaged = restoredMortgaged;
@@ -2364,9 +2394,9 @@ function deactivateUltimate() {
       }
     }
   });
-  Object.keys(state.propertyHouses).forEach(tid => {
-    if (state.propertyHouses[tid] > 0) updateTileHouses(parseInt(tid));
-  });
+
+  // Refresh ikon rumah untuk SEMUA tile yang mungkin berubah (termasuk yang balik ke 0)
+  houseTileIdsToRefresh.forEach(tid => updateTileHouses(parseInt(tid)));
 
   updatePlayersUI();
 }
@@ -2943,10 +2973,19 @@ function triggerChanceCard(player, type) {
     else if (continueBtn) continueBtn.onclick = finish;
   }
   else {
+    // Kartu dengan efek minus uang (mis. denda/biaya).
+    // Pembayaran dijalankan SETELAH pemain menutup modal kartu
+    // (lewat tombol Lanjut), bukan lewat setTimeout independen,
+    // supaya modal debt (jika uang kurang) tidak tampil bertumpuk
+    // dengan modal kartu yang masih terbuka.
     addLog(`${player.name}: ${card.text}`, 'tax');
-    if (player.isAI) setTimeout(() => closeModal('modal-card'), 1200);
-    else if (continueBtn) continueBtn.onclick = () => closeModal('modal-card');
-    setTimeout(() => { attemptPayment(player, -card.amount, null, 'kartu'); }, player.isAI ? 1600 : 0);
+    const applyCardPenalty = () => {
+      if (winnerTriggered) return;
+      closeModal('modal-card');
+      attemptPayment(player, -card.amount, null, 'kartu');
+    };
+    if (player.isAI) setTimeout(applyCardPenalty, 1600);
+    else if (continueBtn) continueBtn.onclick = applyCardPenalty;
   }
   updatePlayersUI();
 }
