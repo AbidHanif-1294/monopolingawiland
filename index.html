@@ -511,7 +511,7 @@
         <h1 class="text-sm sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent truncate">
           MONOPOLY NGAWILAND
         </h1>
-        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Ngawi Edition - Berpetualanglah untuk mencari para member JMK48 dengan membeli setiap kota yang ada di stiker Jomok</p>
+        <p class="text-[10px] sm:text-xs text-slate-400 truncate">Ngawi Edition - Berpetualanglah untuk mencari para member JMK48 dengan membeli seluruh kota yang ada di stiker Jomok</p>
       </div>
     </div>
 
@@ -1136,7 +1136,7 @@ function updateActivePlayerPropertiesUI() {
   container.appendChild(manageBtn);
 }
 
-/* ============================================================ BUILD PANEL (LOGIKA RUMAH MAKSIMAL 4 & SYARAT HOTEL) ============================================================ */
+/* ============================================================ BUILD PANEL (STRICT MONOPOLY RULES & BUG-FREE) ============================================================ */
 function hasFullColorGroup(playerId, group) {
   if (!group || !COLOR_GROUP_INFO[group]) return false;
   const members = COLOR_GROUP_INFO[group].members;
@@ -1159,7 +1159,13 @@ function isSellAllowed(tile, groupTiles) {
 
 function canBuildHouse(player, tile) {
   if (tile.type !== 'property') return false;
-  if (state.mortgaged[tile.id]) return false;
+  if (!tile.group || !COLOR_GROUP_INFO[tile.group]) return false;
+  const members = COLOR_GROUP_INFO[tile.group].members;
+  
+  // PERBAIKAN BUG POTENSIAL 1: Tidak bisa bangun jika ADA petak tanah di grup warna yang sedang di-mortgage!
+  const hasMortgagedMember = members.some(tid => state.mortgaged[tid]);
+  if (hasMortgagedMember) return false;
+
   const houses = state.propertyHouses[tile.id] || 0;
   if (houses >= 4) return false; // Maksimal 4 rumah
   if (!hasFullColorGroup(player.id, tile.group)) return false; // Wajib miliki SEMUA petak tanah dalam grup warna sama!
@@ -1170,12 +1176,17 @@ function canBuildHouse(player, tile) {
 
 function canUpgradeToHotel(player, tile) {
   if (tile.type !== 'property') return false;
-  if (state.mortgaged[tile.id]) return false;
+  if (!tile.group || !COLOR_GROUP_INFO[tile.group]) return false;
+  const members = COLOR_GROUP_INFO[tile.group].members;
+  
+  // PERBAIKAN BUG POTENSIAL 1: Tidak bisa beli hotel jika ADA petak tanah di grup warna yang sedang di-mortgage!
+  const hasMortgagedMember = members.some(tid => state.mortgaged[tid]);
+  if (hasMortgagedMember) return false;
+
   const houses = state.propertyHouses[tile.id] || 0;
   if (houses !== 4) return false; // Wajib sudah bangun tepat 4 rumah di petak ini!
-  if (!tile.group || !COLOR_GROUP_INFO[tile.group]) return false;
   if (!hasFullColorGroup(player.id, tile.group)) return false; // Wajib miliki SEMUA petak tanah dalam grup warna sama!
-  const members = COLOR_GROUP_INFO[tile.group].members;
+  
   const allMin4 = members.every(tid => (state.propertyHouses[tid] || 0) >= 4);
   if (!allMin4) return false; // Semua petak tanah di grup warna ini harus sudah 4 rumah dulu!
   if (player.money < tile.houseCost) return false;
@@ -2100,16 +2111,14 @@ function deactivateUltimate() {
   const ult = ULTIMATE_TYPES[state.ultimate.type];
   addLog(`${ult ? ult.icon : '👑'} <b>${ult ? ult.name : 'Ultimate'} berakhir.</b>`, 'ultimate');
 
-  const currentTileIds = Object.keys(state.propertyOwners);
-  const restoredOwners = {};
-  const restoredHouses = { ...state.ultimate.originalHouses };
-  const restoredMortgaged = { ...state.ultimate.originalMortgaged };
+  // PERBAIKAN BUG POTENSIAL 3: Pertahankan properti yang dibeli / dipindahkan selama Ultimate berlangsung
+  const currentOwners = { ...state.propertyOwners };
+  const currentHouses = { ...state.propertyHouses };
+  const currentMortgaged = { ...state.mortgaged };
 
-  Object.keys(state.ultimate.originalOwners).forEach(tid => {
-    if (currentTileIds.includes(tid)) {
-      restoredOwners[tid] = Number(state.ultimate.originalOwners[tid]);
-    }
-  });
+  const restoredOwners = { ...currentOwners, ...state.ultimate.originalOwners };
+  const restoredHouses = { ...currentHouses, ...state.ultimate.originalHouses };
+  const restoredMortgaged = { ...currentMortgaged, ...state.ultimate.originalMortgaged };
 
   state.propertyOwners = restoredOwners;
   state.propertyHouses = restoredHouses;
@@ -2203,16 +2212,20 @@ function declareBankruptcy() {
   });
   addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
   state.pendingDebt = null;
+  state.isRolling = false;
+  state.isAITurn = false;
   closeModal('modal-debt');
   closeModal('modal-manage');
   updatePlayersUI();
 
   const active = PLAYERS.filter(p => !p.bankrupt);
   if (active.length === 1 && active[0] && !winnerTriggered) {
-    setTimeout(() => triggerWinner(active[0]), 400);
+    triggerWinner(active[0]);
   } else if (active.length === 0 && !winnerTriggered) {
     winnerTriggered = true;
     addLog(`🤝 Tidak ada pemenang — semua bangkrut!`, 'system');
+  } else if (active.length > 1) {
+    handleEndTurn();
   }
 }
 
@@ -2273,6 +2286,17 @@ function doMortgage(playerId, tileId) {
   const tile = BOARD_TILES[tileId];
   if (!player || !tile) return;
   if ((state.propertyHouses[tileId] || 0) > 0) return;
+
+  // PERBAIKAN BUG POTENSIAL 2: Tidak boleh mortgage petak jika ADA rumah/hotel di grup warna yang sama!
+  if (tile.group && COLOR_GROUP_INFO[tile.group]) {
+    const members = COLOR_GROUP_INFO[tile.group].members;
+    const totalGroupHouses = members.reduce((sum, tid) => sum + (state.propertyHouses[tid] || 0), 0);
+    if (totalGroupHouses > 0) {
+      document.getElementById('action-banner').innerHTML = `❌ Jual semua rumah di grup ini dulu sebelum mortgage!`;
+      return;
+    }
+  }
+
   state.mortgaged[tileId] = true;
   player.money += Math.floor(tile.price / 2);
   playSound('cash');
@@ -2309,6 +2333,17 @@ function doSellLand(playerId, tileId) {
   if (!player || !tile) return;
   if ((state.propertyHouses[tileId] || 0) > 0) return;
   if (Number(state.propertyOwners[tileId]) !== Number(playerId)) return;
+
+  // PERBAIKAN BUG POTENSIAL 2: Tidak boleh jual petak jika ADA rumah/hotel di grup warna yang sama!
+  if (tile.group && COLOR_GROUP_INFO[tile.group]) {
+    const members = COLOR_GROUP_INFO[tile.group].members;
+    const totalGroupHouses = members.reduce((sum, tid) => sum + (state.propertyHouses[tid] || 0), 0);
+    if (totalGroupHouses > 0) {
+      document.getElementById('action-banner').innerHTML = `❌ Jual semua rumah di grup ini dulu sebelum menjual tanah!`;
+      return;
+    }
+  }
+
   const refund = Math.floor(tile.price / 2);
   player.money += refund;
   delete state.propertyOwners[tileId];
@@ -2453,13 +2488,17 @@ function aiHandleDebt(player) {
       });
       addLog(`💀 AI BANGKRUT!`, 'tax');
       state.pendingDebt = null;
+      state.isRolling = false;
+      state.isAITurn = false;
       updatePlayersUI();
       const active = PLAYERS.filter(p => !p.bankrupt);
       if (active.length === 1 && active[0] && !winnerTriggered) {
-        setTimeout(() => triggerWinner(active[0]), 400);
+        triggerWinner(active[0]);
       } else if (active.length === 0 && !winnerTriggered) {
         winnerTriggered = true;
         addLog(`🤝 Tidak ada pemenang — semua bangkrut!`, 'system');
+      } else if (active.length > 1) {
+        handleEndTurn();
       }
     }
   }, 1200);
@@ -2638,6 +2677,15 @@ function triggerChanceCard(player, type) {
     if (player.isAI) setTimeout(finishTurn, 1600);
   }
   else if (card.getOut) {
+    if (player.hand.length >= 3) {
+      addLog(`⚠️ Kartu tangan ${player.name} penuh (maks 3)! Kartu tidak dapat disimpan.`, 'card');
+      showCardModal({
+        badge: badgeIcon, title: titleText, desc: `${descText}\n(⚠️ Kartu tangan sudah penuh! Maksimal 3 kartu.)`, image: card.image,
+        actions: [{ label: 'Lanjut →', onClick: finishTurn }]
+      });
+      if (player.isAI) setTimeout(finishTurn, 1600);
+      return;
+    }
     const instanceId = 'card_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
     player.hand.push({
       instanceId,
@@ -2657,6 +2705,15 @@ function triggerChanceCard(player, type) {
     if (player.isAI) setTimeout(finishTurn, 1600);
   }
   else if (card.cancelUltimate) {
+    if (player.hand.length >= 3) {
+      addLog(`⚠️ Kartu tangan ${player.name} penuh (maks 3)! Kartu tidak dapat disimpan.`, 'card');
+      showCardModal({
+        badge: badgeIcon, title: titleText, desc: `${descText}\n(⚠️ Kartu tangan sudah penuh! Maksimal 3 kartu.)`, image: card.image,
+        actions: [{ label: 'Lanjut →', onClick: finishTurn }]
+      });
+      if (player.isAI) setTimeout(finishTurn, 1600);
+      return;
+    }
     const instanceId = 'card_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
     player.hand.push({
       instanceId,
@@ -2675,6 +2732,15 @@ function triggerChanceCard(player, type) {
     if (player.isAI) setTimeout(finishTurn, 1600);
   }
   else if (card.trainToken) {
+    if (player.hand.length >= 3) {
+      addLog(`⚠️ Kartu tangan ${player.name} penuh (maks 3)! Kartu tidak dapat disimpan.`, 'card');
+      showCardModal({
+        badge: badgeIcon, title: titleText, desc: `${descText}\n(⚠️ Kartu tangan sudah penuh! Maksimal 3 kartu.)`, image: card.image,
+        actions: [{ label: 'Lanjut →', onClick: finishTurn }]
+      });
+      if (player.isAI) setTimeout(finishTurn, 1600);
+      return;
+    }
     const instanceId = 'card_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
     player.hand.push({
       instanceId,
@@ -3160,6 +3226,9 @@ function triggerWinner(winner) {
   if (!modal.classList.contains('hidden')) return;
 
   winnerTriggered = true;
+  state.isRolling = false;
+  state.isAITurn = false;
+  state.phase = 'game-over';
   playSound('win');
 
   const winnerName = `${winner.token || '?'} ${winner.name || 'Unknown'}`;
@@ -3174,6 +3243,14 @@ function triggerWinner(winner) {
   const count = Object.values(state.propertyOwners)
     .filter(id => Number(id) === Number(winner.id)).length;
   if (propsEl) propsEl.innerText = count;
+
+  closeModal('modal-debt');
+  closeModal('modal-jail');
+  closeModal('modal-property');
+  closeModal('modal-manage');
+  closeModal('modal-card');
+  closeModal('modal-train');
+  closeModal('modal-cancel-ultimate');
 
   modal.classList.remove('hidden');
   startConfetti();
