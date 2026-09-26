@@ -2999,7 +2999,7 @@ function endTurnAfterDelay() {
 
   if (player.money < 0 && !state.pendingDebt) {
     player.bankrupt = true;
-    addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
+    addLog(`💀 ${player.name} BANGKRUT! YAHAHAHA POKE!`, 'tax');
   }
 
   const active = PLAYERS.filter(p => !p.bankrupt);
@@ -3033,7 +3033,7 @@ function handleEndTurn() {
 
   if (player.money < 0 && !state.pendingDebt) {
     player.bankrupt = true;
-    addLog(`💀 ${player.name} BANGKRUT!`, 'tax');
+    addLog(`💀 ${player.name} BANGKRUT! YAHAHAHA POKE!`, 'tax');
   }
 
   const active = PLAYERS.filter(p => !p.bankrupt);
